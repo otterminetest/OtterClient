@@ -1,0 +1,16 @@
+---
+# Github repository is cloned every day on Gitlab.com
+# https://gitlab.com/minetest/minetest
+# Pipelines URL: https://gitlab.com/minetest/minetest/pipelines
+
+
+pages:
+  stage: deploy
+  image: python:3.8
+  script:
+    - ./misc/make_redirects.sh
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
