@@ -69,14 +69,14 @@ For Void users:
 
 Download source (this is the URL to the latest of source repository, which might not work at all times) using Git:
 
-    git clone --depth 1 https://github.com/minetest/minetest.git
-    cd minetest
+    git clone --depth 1 https://github.com/otterminetest/OtterClient.git
+    cd OtterClient
 
 Download source, without using Git:
 
-    wget https://github.com/minetest/minetest/archive/master.tar.gz
+    wget https://github.com/otterminetest/OtterClient/archive/master.tar.gz
     tar xf master.tar.gz
-    cd minetest-master
+    cd OtterClient-master
 
 ## Build
 
