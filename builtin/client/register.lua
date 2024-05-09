@@ -81,3 +81,8 @@ core.registered_on_item_use, core.register_on_item_use = make_registration()
 core.registered_on_modchannel_message, core.register_on_modchannel_message = make_registration()
 core.registered_on_modchannel_signal, core.register_on_modchannel_signal = make_registration()
 core.registered_on_inventory_open, core.register_on_inventory_open = make_registration()
+
+-- OtterClient
+core.registered_on_block_data, core.register_on_block_data = make_registration()
+core.registered_on_player_join, core.register_on_player_join = make_registration()
+core.registered_on_player_leave, core.register_on_player_leave = make_registration()

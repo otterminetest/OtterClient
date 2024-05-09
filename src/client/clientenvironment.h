@@ -127,6 +127,11 @@ public:
 	{
 		return m_ao_manager.getActiveObjects(origin, max_d, dest);
 	}
+	void getAllActiveObjects(const v3f &origin,
+		std::vector<DistanceSortedActiveObject> &dest)
+	{
+		return m_ao_manager.getAllActiveObjects(origin, dest);
+	}
 
 	bool hasClientEnvEvents() const { return !m_client_event_queue.empty(); }
 

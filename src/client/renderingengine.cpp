@@ -417,6 +417,12 @@ void RenderingEngine::draw_scene(video::SColor skycolor, bool show_hud,
 	core->draw(skycolor, show_hud, draw_wield_tool, draw_crosshair);
 }
 
+void RenderingEngine::draw_HUD(video::SColor skycolor, bool show_hud,
+		bool draw_wield_tool, bool draw_crosshair)
+{
+	core->draw_HUD(skycolor, show_hud, draw_wield_tool, draw_crosshair);
+}
+
 const VideoDriverInfo &RenderingEngine::getVideoDriverInfo(irr::video::E_DRIVER_TYPE type)
 {
 	static const std::unordered_map<int, VideoDriverInfo> driver_info_map = {

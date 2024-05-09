@@ -90,6 +90,54 @@ private:
 	// get_csm_restrictions()
 	static int l_get_csm_restrictions(lua_State *L);
 
+	// send_damage(damage)
+	static int l_send_damage(lua_State *L);
+
+	// set_fast_speed(speed)
+	static int l_set_fast_speed(lua_State *L);
+
+	// place_node(pos)
+	static int l_place_node(lua_State *L);
+
+	// dig_node(pos)
+	static int l_dig_node(lua_State *L);
+
+	// interact(action, pointed_thing)
+	static int l_interact(lua_State *L);
+
+	// get_inventory(location)
+	static int l_get_inventory(lua_State *L);
+
+	// set_keypress(key_setting, pressed)
+	static int l_set_keypress(lua_State *L);
+
+	// drop_selected_item()
+	static int l_drop_selected_item(lua_State *L);
+
+	// get_objects_inside_radius(pos, radius)
+	static int l_get_objects_inside_radius(lua_State *L);
+
+	// get_all_objects(pos)
+	static int l_get_all_objects(lua_State *L);
+
+	// make_screenshot()
+	static int l_make_screenshot(lua_State *L);
+
+	// all_loaded_nodes()
+	static int l_all_loaded_nodes(lua_State *L);
+
+	// nodes_at(pos)
+	static int l_nodes_at_block_pos(lua_State *L);
+
+	// file_write(path, content)
+	static int l_file_write(lua_State *L);
+
+	// file_append(path, content)
+	static int l_file_append(lua_State *L);
+
+	// get_node_name(pos)
+	static int l_get_node_name(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 };

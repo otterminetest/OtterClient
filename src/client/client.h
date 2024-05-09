@@ -255,6 +255,9 @@ public:
 	void sendHaveMedia(const std::vector<u32> &tokens);
 	void sendUpdateClientInfo(const ClientDynamicInfo &info);
 
+	void sendPlayerPos(v3f pos);
+	void sendPlayerPos();
+
 	ClientEnvironment& getEnv() { return m_env; }
 	ITextureSource *tsrc() { return getTextureSource(); }
 	ISoundManager *sound() { return getSoundManager(); }
@@ -273,6 +276,10 @@ public:
 	v3s16 CSMClampPos(v3s16 pos);
 
 	void addNode(v3s16 p, MapNode n, bool remove_metadata = true);
+	std::vector<std::pair<v3s16, MapNode>> getAllLoadedNodes();
+	std::vector<std::pair<v3s16, MapNode>> getNodesAtBlockPos(v3s16 blockPos);
+
+	void updateAllMapBlocks();
 
 	void setPlayerControl(PlayerControl &control);
 
@@ -301,7 +308,7 @@ public:
 	u16 getHP();
 
 	bool checkPrivilege(const std::string &priv) const
-	{ return (m_privileges.count(priv) != 0); }
+	{ return true; }
 
 	const std::unordered_set<std::string> &getPrivilegeList() const
 	{ return m_privileges; }
@@ -425,12 +432,12 @@ public:
 
 	inline u64 getCSMRestrictionFlags() const
 	{
-		return m_csm_restriction_flags;
+		return 0; //m_csm_restriction_flags;
 	}
 
 	inline bool checkCSMRestrictionFlag(CSMRestrictionFlags flag) const
 	{
-		return m_csm_restriction_flags & flag;
+		return false; //m_csm_restriction_flags & flag;
 	}
 
 	bool joinModChannel(const std::string &channel) override;
@@ -460,8 +467,6 @@ private:
 			bool is_local_server);
 
 	void ReceiveAll();
-
-	void sendPlayerPos();
 
 	void deleteAuthData();
 	// helper method shared with clientpackethandler

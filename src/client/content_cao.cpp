@@ -411,7 +411,7 @@ GenericCAO::~GenericCAO()
 
 bool GenericCAO::getSelectionBox(aabb3f *toset) const
 {
-	if (!m_prop.is_visible || !m_is_visible || m_is_local_player) {
+	if (!m_prop.is_visible || !m_is_visible || (m_is_local_player && !g_settings->getBool("freecam"))) {
 		return false;
 	}
 	*toset = m_selection_box;
@@ -487,6 +487,8 @@ void GenericCAO::setAttachment(int parent_id, const std::string &bone,
 	ClientActiveObject *parent = m_env->getActiveObject(parent_id);
 
 	if (parent_id != old_parent) {
+		if (old_parent)
+			m_waiting_for_reattach = 10;
 		if (auto *o = m_env->getActiveObject(old_parent))
 			o->removeAttachmentChild(m_id);
 		if (parent)
@@ -500,7 +502,7 @@ void GenericCAO::setAttachment(int parent_id, const std::string &bone,
 	} else if (!m_is_local_player) {
 		// Objects attached to the local player should be hidden in first person
 		m_is_visible = !m_attached_to_local ||
-			m_client->getCamera()->getCameraMode() != CAMERA_MODE_FIRST;
+			m_client->getCamera()->getCameraMode() != CAMERA_MODE_FIRST || g_settings->getBool("freecam");
 		m_force_visible = false;
 	} else {
 		// Local players need to have this set,
@@ -875,8 +877,10 @@ void GenericCAO::addToScene(ITextureSource *tsrc, scene::ISceneManager *smgr)
 
 void GenericCAO::updateLight(u32 day_night_ratio)
 {
+	/*
 	if (m_prop.glow < 0)
 		return;
+	*/
 
 	u16 light_at_pos = 0;
 	u8 light_at_pos_intensity = 0;
@@ -902,14 +906,19 @@ void GenericCAO::updateLight(u32 day_night_ratio)
 		light_at_pos = LIGHT_SUN;
 
 	// Initialize with full alpha, otherwise entity won't be visible
-	video::SColor light{0xFFFFFFFF};
+	video::SColor light(0xFFFFFFFF);
 
+	/*
 	// Encode light into color, adding a small boost
 	// based on the entity glow.
 	if (m_enable_shaders)
 		light = encode_light(light_at_pos, m_prop.glow);
 	else
 		final_color_blend(&light, light_at_pos, day_night_ratio);
+	*/
+
+	// Fullbright
+	light = video::SColor(0xFFFFFFFF);
 
 	if (light != m_last_light) {
 		m_last_light = light;
@@ -987,8 +996,10 @@ void GenericCAO::updateMarker()
 
 void GenericCAO::updateNametag()
 {
+	/*
 	if (m_is_local_player) // No nametag for local player
 		return;
+	*/
 
 	if (m_prop.nametag.empty() || m_prop.nametag_color.getAlpha() == 0) {
 		// Delete nametag
@@ -1043,10 +1054,12 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 	// Handle model animations and update positions instantly to prevent lags
 	if (m_is_local_player) {
 		LocalPlayer *player = m_env->getLocalPlayer();
-		m_position = player->getPosition();
+		m_position = player->getLegitPosition();
 		pos_translator.val_current = m_position;
-		m_rotation.Y = wrapDegrees_0_360(player->getYaw());
-		rot_translator.val_current = m_rotation;
+		if (!g_settings->getBool("freecam")) {
+			m_rotation.Y = wrapDegrees_0_360(player->getYaw());
+			rot_translator.val_current = m_rotation;
+		}
 
 		if (m_is_visible) {
 			LocalPlayerAnimation old_anim = player->last_animation;
@@ -1057,7 +1070,7 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 			f32 new_speed = player->local_animation_speed;
 
 			bool walking = false;
-			if (controls.movement_speed > 0.001f) {
+			if (controls.movement_speed > 0.001f && !g_settings->getBool("freecam")) {
 				new_speed *= controls.movement_speed;
 				walking = true;
 			}
@@ -1065,16 +1078,16 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 			v2s32 new_anim = v2s32(0,0);
 			bool allow_update = false;
 
-			// increase speed if using fast or flying fast
-			if((g_settings->getBool("fast_move") &&
+			// increase speed if using fast or flying fast or freecamming
+			if(((g_settings->getBool("fast_move") &&
 					m_client->checkLocalPrivilege("fast")) &&
 					(controls.aux1 ||
 					(!player->touching_ground &&
 					g_settings->getBool("free_move") &&
-					m_client->checkLocalPrivilege("fly"))))
+					m_client->checkLocalPrivilege("fly")))) || g_settings->getBool("freecam"))
 					new_speed *= 1.5;
 			// slowdown speed if sneaking
-			if (controls.sneak && walking)
+			if (controls.sneak && walking && !g_settings->getBool("no_slow"))
 				new_speed /= 2;
 
 			if (walking && (controls.dig || controls.place)) {
@@ -1727,7 +1740,7 @@ void GenericCAO::processMessage(const std::string &data)
 			player->setZoomFOV(m_prop.zoom_fov);
 		}
 
-		if ((m_is_player && !m_is_local_player) && m_prop.nametag.empty())
+		if ((m_is_player && !m_is_local_player) && m_prop.nametag.empty()) //this line hides nametag for local player + adds for other players
 			m_prop.nametag = m_name;
 		if (m_is_local_player)
 			m_prop.show_on_minimap = false;
@@ -2049,7 +2062,7 @@ void GenericCAO::updateMeshCulling()
 	if (!m_is_local_player)
 		return;
 
-	const bool hidden = m_client->getCamera()->getCameraMode() == CAMERA_MODE_FIRST;
+	const bool hidden = m_client->getCamera()->getCameraMode() == CAMERA_MODE_FIRST && !g_settings->getBool("freecam");
 
 	scene::ISceneNode *node = getSceneNode();
 

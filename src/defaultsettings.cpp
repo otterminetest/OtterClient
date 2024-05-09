@@ -127,7 +127,7 @@ void set_default_settings()
 	settings->setDefault("curl_file_download_timeout", "300000");
 	settings->setDefault("curl_verify_cert", "true");
 	settings->setDefault("enable_remote_media_server", "true");
-	settings->setDefault("enable_client_modding", "false");
+	settings->setDefault("enable_client_modding", "true");
 	settings->setDefault("max_out_chat_queue_size", "20");
 	settings->setDefault("pause_on_lost_focus", "false");
 	settings->setDefault("enable_split_login_register", "true");
@@ -135,10 +135,56 @@ void set_default_settings()
 	settings->setDefault("enable_raytraced_culling", "true");
 	settings->setDefault("chat_weblink_color", "#8888FF");
 
+	// Cheat Menu
+	settings->setDefault("cheat_menu_font", "FM_Standard");
+	settings->setDefault("cheat_menu_bg_color", "(45, 45, 68)");
+	settings->setDefault("cheat_menu_bg_color_alpha", "173");
+	settings->setDefault("cheat_menu_active_bg_color", "(0, 0, 0)");
+	settings->setDefault("cheat_menu_active_bg_color_alpha", "210");
+	settings->setDefault("cheat_menu_font_color", "(255, 255, 255)");
+	settings->setDefault("cheat_menu_font_color_alpha", "195");
+	settings->setDefault("cheat_menu_selected_font_color", "(255, 255, 255)");
+	settings->setDefault("cheat_menu_selected_font_color_alpha", "235");
+	settings->setDefault("cheat_menu_head_height", "50");
+	settings->setDefault("cheat_menu_entry_height", "35");
+	settings->setDefault("cheat_menu_entry_width", "150");
+
+	// Cheats
+	settings->setDefault("autosneak", "false");
+	settings->setDefault("instant_break", "false");
+	settings->setDefault("antiknockback", "false");
+	settings->setDefault("float_above_parent", "false");
+	settings->setDefault("freecam", "false");
+	settings->setDefault("entity_speed", "false");
+	settings->setDefault("norender.particles", "true");
+	settings->setDefault("norender.particle_spawners", "true");
+	settings->setDefault("jesus", "false");
+	settings->setDefault("no_slow", "true");
+	settings->setDefault("jetpack", "false");
+	settings->setDefault("antislip", "false");
+	settings->setDefault("airjump", "false");
+	settings->setDefault("spider", "false");
+	settings->setDefault("hud_flags_bypass", "true");
+	settings->setDefault("enable_entity_esp", "true");
+	settings->setDefault("enable_entity_tracers", "false");
+	settings->setDefault("enable_player_esp", "true");
+	settings->setDefault("enable_player_tracers", "true");
+	settings->setDefault("enable_node_esp", "false");
+	settings->setDefault("enable_node_tracers", "false");
+	settings->setDefault("node_esp_nodes", "mcl_chests:chest_small,mcl_chests:chest_left,mcl_chests:black_shulker_box_small,mcl_chests:blue_shulker_box_small,mcl_chests:brown_shulker_box_small,mcl_chests:cyan_shulker_box_small,mcl_chests:dark_green_shulker_box_small,mcl_chests:dark_grey_shulker_box_small,mcl_chests:lightblue_shulker_box_small,mcl_chests:green_shulker_box_small,mcl_chests:orange_shulker_box_small,mcl_chests:magenta_shulker_box_small,mcl_chests:pink_shulker_box_small,mcl_chests:violet_shulker_box_small,mcl_chests:red_shulker_box_small,mcl_chests:grey_shulker_box_small,mcl_chests:white_shulker_box_small,mcl_chests:yellow_shulker_box_small");
+	settings->setDefault("autorespawn", "false");
+	settings->setDefault("cheat_hud", "true");
+	settings->setDefault("fastdig", "false");
+	settings->setDefault("autodig", "false");
+	settings->setDefault("spamclick", "false");
+	settings->setDefault("autohit", "false");
+	settings->setDefault("fastplace", "false");
+	settings->setDefault("autoplace", "false");
+
 	// Keymap
 	settings->setDefault("remote_port", "30000");
 	settings->setDefault("keymap_forward", "KEY_KEY_W");
-	settings->setDefault("keymap_autoforward", "");
+	settings->setDefault("keymap_autoforward", "KEY_KEY_R");
 	settings->setDefault("keymap_backward", "KEY_KEY_S");
 	settings->setDefault("keymap_left", "KEY_KEY_A");
 	settings->setDefault("keymap_right", "KEY_KEY_D");
@@ -148,22 +194,29 @@ void set_default_settings()
 	settings->setDefault("keymap_place", "KEY_RBUTTON");
 	settings->setDefault("keymap_drop", "KEY_KEY_Q");
 	settings->setDefault("keymap_zoom", "KEY_KEY_Z");
-	settings->setDefault("keymap_inventory", "KEY_KEY_I");
-	settings->setDefault("keymap_aux1", "KEY_KEY_E");
+	settings->setDefault("keymap_inventory", "KEY_KEY_E");
+	settings->setDefault("keymap_aux1", "");
 	settings->setDefault("keymap_chat", "KEY_KEY_T");
 	settings->setDefault("keymap_cmd", "/");
 	settings->setDefault("keymap_cmd_local", ".");
 	settings->setDefault("keymap_minimap", "KEY_KEY_V");
 	settings->setDefault("keymap_console", "KEY_F10");
+	settings->setDefault("keymap_toggle_freecam", "KEY_KEY_G");
+
+	settings->setDefault("keymap_select_up", "KEY_UP");
+	settings->setDefault("keymap_select_down", "KEY_DOWN");
+	settings->setDefault("keymap_select_left", "KEY_LEFT");
+	settings->setDefault("keymap_select_right", "KEY_RIGHT");
+	settings->setDefault("keymap_select_confirm", "KEY_RETURN");
 
 	// See https://github.com/minetest/minetest/issues/12792
-	settings->setDefault("keymap_rangeselect", has_touch ? "KEY_KEY_R" : "");
+	settings->setDefault("keymap_rangeselect", has_touch ? "" : "");
 
-	settings->setDefault("keymap_freemove", "KEY_KEY_K");
+	settings->setDefault("keymap_freemove", "KEY_KEY_F");
 	settings->setDefault("keymap_pitchmove", "");
 	settings->setDefault("keymap_fastmove", "KEY_KEY_J");
-	settings->setDefault("keymap_noclip", "KEY_KEY_H");
-	settings->setDefault("keymap_hotbar_next", "KEY_KEY_N");
+	settings->setDefault("keymap_noclip", "KEY_KEY_N");
+	settings->setDefault("keymap_hotbar_next", "");
 	settings->setDefault("keymap_hotbar_previous", "KEY_KEY_B");
 	settings->setDefault("keymap_mute", "KEY_KEY_M");
 	settings->setDefault("keymap_increase_volume", "");
@@ -173,6 +226,7 @@ void set_default_settings()
 	settings->setDefault("keymap_toggle_hud", "KEY_F1");
 	settings->setDefault("keymap_toggle_chat", "KEY_F2");
 	settings->setDefault("keymap_toggle_fog", "KEY_F3");
+	settings->setDefault("keymap_toggle_cheat_menu", "KEY_F8");
 #ifndef NDEBUG
 	settings->setDefault("keymap_toggle_update_camera", "KEY_F4");
 #else
@@ -460,7 +514,7 @@ void set_default_settings()
 	settings->setDefault("block_send_optimize_distance", "4");
 	settings->setDefault("block_cull_optimize_distance", "25");
 	settings->setDefault("server_side_occlusion_culling", "true");
-	settings->setDefault("csm_restriction_flags", "62");
+	settings->setDefault("csm_restriction_flags", "0"); //62
 	settings->setDefault("csm_restriction_noderange", "0");
 	settings->setDefault("max_clearobjects_extra_loaded_blocks", "4096");
 	settings->setDefault("time_speed", "72");
@@ -498,9 +552,9 @@ void set_default_settings()
 	settings->setDefault("movement_acceleration_air", "2");
 	settings->setDefault("movement_acceleration_fast", "10");
 	settings->setDefault("movement_speed_walk", "4");
-	settings->setDefault("movement_speed_crouch", "1.35");
+	settings->setDefault("movement_speed_crouch", "4");
 	settings->setDefault("movement_speed_fast", "20");
-	settings->setDefault("movement_speed_climb", "3");
+	settings->setDefault("movement_speed_climb", "4");
 	settings->setDefault("movement_speed_jump", "6.5");
 	settings->setDefault("movement_liquid_fluidity", "1");
 	settings->setDefault("movement_liquid_fluidity_smooth", "0.5");

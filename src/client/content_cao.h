@@ -166,11 +166,17 @@ public:
 
 	const v3f getPosition() const override final;
 
+	inline const v3f getAcceleration() const { return m_acceleration; }
+
+	inline u16 getHp() const { return m_hp; }
+
 	const v3f getVelocity() const override final { return m_velocity; }
 
 	inline const v3f &getRotation() const { return m_rotation; }
 
 	bool isImmortal() const;
+
+	float m_waiting_for_reattach;
 
 	inline const ObjectProperties &getProperties() const { return m_prop; }
 
@@ -235,6 +241,7 @@ public:
 	void addAttachmentChild(int child_id) override;
 	void removeAttachmentChild(int child_id) override;
 	ClientActiveObject *getParent() const override;
+	int getParentId() const { return m_attachment_parent_id; }
 	const std::unordered_set<int> &getAttachmentChildIds() const override
 	{ return m_attachment_child_ids; }
 	void updateAttachments() override;

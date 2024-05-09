@@ -308,7 +308,7 @@ void ParticleSpawner::spawnParticle(ClientEnvironment *env, float radius,
 	if (p.time != 0) { // ensure safety from divide-by-zeroes
 		fac = m_time / (p.time+0.1f);
 	}
-
+	
 	auto r_pos    = p.pos.blend(fac);
 	auto r_vel    = p.vel.blend(fac);
 	auto r_acc    = p.acc.blend(fac);

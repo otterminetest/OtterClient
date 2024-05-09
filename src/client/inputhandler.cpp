@@ -65,6 +65,7 @@ void KeyCache::populate()
 	key[KeyType::TOGGLE_HUD] = getKeySetting("keymap_toggle_hud");
 	key[KeyType::TOGGLE_CHAT] = getKeySetting("keymap_toggle_chat");
 	key[KeyType::TOGGLE_FOG] = getKeySetting("keymap_toggle_fog");
+	key[KeyType::TOGGLE_CHEAT_MENU] = getKeySetting("keymap_toggle_cheat_menu");
 	key[KeyType::TOGGLE_UPDATE_CAMERA] = getKeySetting("keymap_toggle_update_camera");
 	key[KeyType::TOGGLE_DEBUG] = getKeySetting("keymap_toggle_debug");
 	key[KeyType::TOGGLE_PROFILER] = getKeySetting("keymap_toggle_profiler");
@@ -75,6 +76,14 @@ void KeyCache::populate()
 			getKeySetting("keymap_decrease_viewing_range_min");
 	key[KeyType::RANGESELECT] = getKeySetting("keymap_rangeselect");
 	key[KeyType::ZOOM] = getKeySetting("keymap_zoom");
+	key[KeyType::SELECT_UP] = getKeySetting("keymap_select_up");
+	key[KeyType::SELECT_DOWN] = getKeySetting("keymap_select_down");
+	key[KeyType::SELECT_LEFT] = getKeySetting("keymap_select_left");
+	key[KeyType::SELECT_RIGHT] = getKeySetting("keymap_select_right");
+	key[KeyType::SELECT_CONFIRM] = getKeySetting("keymap_select_confirm");
+
+	// cheats
+	key[KeyType::FREECAM] = getKeySetting("keymap_toggle_freecam");
 
 	key[KeyType::QUICKTUNE_NEXT] = getKeySetting("keymap_quicktune_next");
 	key[KeyType::QUICKTUNE_PREV] = getKeySetting("keymap_quicktune_prev");

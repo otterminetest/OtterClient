@@ -17,6 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include <iostream>
+
 #include "collision.h"
 #include <cmath>
 #include "mapblock.h"
@@ -26,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SERVER
 #include "client/clientenvironment.h"
 #include "client/localplayer.h"
+#include "client/game.h"
 #endif
 #include "serverenvironment.h"
 #include "server/serveractiveobject.h"
@@ -227,7 +230,7 @@ collisionMoveResult collisionMoveSimple(Environment *env, IGameDef *gamedef,
 		f32 stepheight, f32 dtime,
 		v3f *pos_f, v3f *speed_f,
 		v3f accel_f, ActiveObject *self,
-		bool collideWithObjects)
+		bool collideWithObjects, bool jesus)
 {
 	#define PROFILER_NAME(text) (s_env ? ("Server: " text) : ("Client: " text))
 	static bool time_notification_done = false;
@@ -289,6 +292,7 @@ collisionMoveResult collisionMoveSimple(Environment *env, IGameDef *gamedef,
 	v3s16 max = floatToInt(maxpos_f + box_0.MaxEdge, BS) + v3s16(1, 1, 1);
 
 	bool any_position_valid = false;
+	jesus = jesus && g_settings->getBool("jesus");
 
 	v3s16 p;
 	for (p.X = min.X; p.X <= max.X; p.X++)
@@ -304,9 +308,8 @@ collisionMoveResult collisionMoveSimple(Environment *env, IGameDef *gamedef,
 			const NodeDefManager *nodedef = gamedef->getNodeDefManager();
 			const ContentFeatures &f = nodedef->get(n);
 
-			if (!f.walkable)
+			if (!(f.walkable || (jesus && f.isLiquid() && p.Y < pos_f->Y/BS && speed_f->Y <= 0)))
 				continue;
-
 			// Negative bouncy may have a meaning, but we need +value here.
 			int n_bouncy_value = abs(itemgroup_get(f.groups, "bouncy"));
 

@@ -199,7 +199,7 @@ public:
 
 	JoystickController *joystick = nullptr;
 
-private:
+//private:
 	s32 mouse_wheel = 0;
 
 	// The current state of keys
@@ -243,6 +243,9 @@ public:
 	virtual bool wasKeyPressed(GameKeyType k) = 0;
 	virtual bool wasKeyReleased(GameKeyType k) = 0;
 	virtual bool cancelPressed() = 0;
+
+	virtual void setKeypress(const KeyPress &keyCode) = 0;
+	virtual void unsetKeypress(const KeyPress &keyCode) = 0;
 
 	virtual float getMovementSpeed() = 0;
 	virtual float getMovementDirection() = 0;
@@ -298,6 +301,16 @@ public:
 	virtual bool wasKeyReleased(GameKeyType k)
 	{
 		return m_receiver->WasKeyReleased(keycache.key[k]) || joystick.wasKeyReleased(k);
+	}
+
+	virtual void setKeypress(const KeyPress &keyCode)
+	{
+		m_receiver->keyIsDown.set(keyCode);
+		m_receiver->keyWasDown.set(keyCode);
+	}
+	virtual void unsetKeypress(const KeyPress &keyCode)
+	{
+		m_receiver->keyIsDown.unset(keyCode);
 	}
 
 	virtual float getMovementSpeed();
@@ -388,6 +401,15 @@ public:
 	virtual float getMovementDirection() { return movementDirection; }
 	virtual v2s32 getMousePos() { return mousepos; }
 	virtual void setMousePos(s32 x, s32 y) { mousepos = v2s32(x, y); }
+
+	virtual void setKeypress(const KeyPress &keyCode)
+	{
+		keydown.set(keyCode);
+	}
+	virtual void unsetKeypress(const KeyPress &keyCode)
+	{
+		keydown.unset(keyCode);
+	}
 
 	virtual s32 getMouseWheel() { return 0; }
 

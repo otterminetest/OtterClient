@@ -181,8 +181,9 @@ void Client::loadMods()
 	// Don't load mods twice.
 	// If client scripting is disabled by the client, don't load builtin or
 	// client-provided mods.
-	if (m_mods_loaded || !g_settings->getBool("enable_client_modding"))
+	if (m_mods_loaded || !g_settings->getBool("enable_client_modding")) {
 		return;
+	}
 
 	// If client scripting is disabled by the server, don't load builtin or
 	// client-provided mods.
@@ -247,6 +248,9 @@ void Client::loadMods()
 
 	// Run a callback when mods are loaded
 	m_script->on_mods_loaded();
+
+	// Initialize cheats
+	m_script->init_cheats();
 
 	// Create objects if they're ready
 	if (m_state == LC_Ready)
@@ -536,8 +540,8 @@ void Client::step(float dtime)
 		if (envEvent.type == CEE_PLAYER_DAMAGE) {
 			u16 damage = envEvent.player_damage.amount;
 
-			if (envEvent.player_damage.send_to_server)
-				sendDamage(damage);
+			//if (envEvent.player_damage.send_to_server)
+			//	sendDamage(damage);
 
 			// Add to ClientEvent queue
 			ClientEvent *event = new ClientEvent();
@@ -1043,13 +1047,18 @@ void Client::Send(NetworkPacket* pkt)
 }
 
 // Will fill up 12 + 12 + 4 + 4 + 4 + 1 + 1 + 1 bytes
-void writePlayerPos(LocalPlayer *myplayer, ClientMap *clientMap, NetworkPacket *pkt, bool camera_inverted)
+void writePlayerPos(LocalPlayer *myplayer, ClientMap *clientMap, NetworkPacket *pkt, bool camera_inverted, bool autoSneak)
 {
-	v3f pf           = myplayer->getPosition() * 100;
-	v3f sf           = myplayer->getSpeed() * 100;
-	s32 pitch        = myplayer->getPitch() * 100;
-	s32 yaw          = myplayer->getYaw() * 100;
-	u32 keyPressed   = myplayer->control.getKeysPressed();
+	v3f pf           = myplayer->getLegitPosition() * 100;
+	v3f sf           = myplayer->getSendSpeed() * 100;
+	s32 pitch        = myplayer->getLegitPitch() * 100;
+	s32 yaw          = myplayer->getLegitYaw() * 100;
+	u32 keyPressed;
+	if (autoSneak) {
+		keyPressed = myplayer->control.getKeysPressedAutoSneak();
+	} else {
+		keyPressed = myplayer->control.getKeysPressed();
+	}
 	// scaled by 80, so that pi can fit into a u8
 	u8 fov           = std::fmin(255.0f, clientMap->getCameraFov() * 80.0f);
 	u8 wanted_range  = std::fmin(255.0f,
@@ -1106,7 +1115,11 @@ void Client::interact(InteractAction action, const PointedThing& pointed)
 
 	pkt.putLongString(tmp_os.str());
 
-	writePlayerPos(myplayer, &m_env.getClientMap(), &pkt, m_camera->getCameraMode() == CAMERA_MODE_THIRD_FRONT);
+	if (action == INTERACT_PLACE) {
+		writePlayerPos(myplayer, &m_env.getClientMap(), &pkt, m_camera->getCameraMode() == CAMERA_MODE_THIRD_FRONT, false);	
+	} else {
+		writePlayerPos(myplayer, &m_env.getClientMap(), &pkt, m_camera->getCameraMode() == CAMERA_MODE_THIRD_FRONT, g_settings->getBool("autosneak"));	
+	}
 
 	Send(&pkt);
 }
@@ -1389,7 +1402,7 @@ void Client::sendReady()
 	Send(&pkt);
 }
 
-void Client::sendPlayerPos()
+void Client::sendPlayerPos(v3f pos)
 {
 	LocalPlayer *player = m_env.getLocalPlayer();
 	if (!player)
@@ -1410,20 +1423,20 @@ void Client::sendPlayerPos()
 	bool camera_inverted = m_camera->getCameraMode() == CAMERA_MODE_THIRD_FRONT;
 
 	if (
-			player->last_position        == player->getPosition() &&
-			player->last_speed           == player->getSpeed()    &&
-			player->last_pitch           == player->getPitch()    &&
-			player->last_yaw             == player->getYaw()      &&
+			player->last_position        == pos &&
+			player->last_speed           == player->getSendSpeed()    &&
+			player->last_pitch           == player->getLegitPitch()    &&
+			player->last_yaw             == player->getLegitYaw()      &&
 			player->last_keyPressed      == keyPressed            &&
 			player->last_camera_fov      == camera_fov            &&
 			player->last_camera_inverted == camera_inverted       &&
 			player->last_wanted_range    == wanted_range)
 		return;
 
-	player->last_position        = player->getPosition();
-	player->last_speed           = player->getSpeed();
-	player->last_pitch           = player->getPitch();
-	player->last_yaw             = player->getYaw();
+	player->last_position        = pos;
+	player->last_speed           = player->getSendSpeed();
+	player->last_pitch           = player->getLegitPitch();
+	player->last_yaw             = player->getLegitYaw();
 	player->last_keyPressed      = keyPressed;
 	player->last_camera_fov      = camera_fov;
 	player->last_camera_inverted = camera_inverted;
@@ -1431,9 +1444,18 @@ void Client::sendPlayerPos()
 
 	NetworkPacket pkt(TOSERVER_PLAYERPOS, 12 + 12 + 4 + 4 + 4 + 1 + 1 + 1);
 
-	writePlayerPos(player, &map, &pkt, camera_inverted);
+	bool autosneak = g_settings->getBool("autosneak");
+	writePlayerPos(player, &map, &pkt, camera_inverted, autosneak);
 
 	Send(&pkt);
+}
+
+void Client::sendPlayerPos()
+{
+	LocalPlayer *player = m_env.getLocalPlayer();
+	if (!player)
+		return;
+	sendPlayerPos(player->getLegitPosition());
 }
 
 void Client::sendHaveMedia(const std::vector<u32> &tokens)
@@ -1535,6 +1557,76 @@ void Client::addNode(v3s16 p, MapNode n, bool remove_metadata)
 
 	for (const auto &modified_block : modified_blocks) {
 		addUpdateMeshTaskWithEdge(modified_block.first, false, true);
+	}
+}
+
+std::vector<std::pair<v3s16, MapNode>> Client::getNodesAtBlockPos(v3s16 blockPos)
+{
+	Map &map = m_env.getMap();
+	std::vector<std::pair<v3s16, MapNode>> nodes;
+	MapBlock *block = map.getBlockNoCreate(blockPos);
+	if (!block)
+		return nodes;
+
+	v3s16 relNodePos;
+	for (relNodePos.Z = 0; relNodePos.Z < MAP_BLOCKSIZE; ++relNodePos.Z)
+	for (relNodePos.Y = 0; relNodePos.Y < MAP_BLOCKSIZE; ++relNodePos.Y)
+	for (relNodePos.X = 0; relNodePos.X < MAP_BLOCKSIZE; ++relNodePos.X) {
+		v3s16 absoluteNodePos = blockPos * MAP_BLOCKSIZE + relNodePos;
+		bool is_valid_position;
+		MapNode node = CSMGetNode(absoluteNodePos, &is_valid_position);
+		
+		if (is_valid_position)
+			nodes.push_back(std::make_pair(absoluteNodePos, node));
+	}
+
+	return nodes;
+}
+
+std::vector<std::pair<v3s16, MapNode>> Client::getAllLoadedNodes()
+{
+	Map &map = m_env.getMap();
+	std::vector<v3s16> blockPositions;
+	map.listAllLoadedBlocks(blockPositions);
+
+	std::vector<std::pair<v3s16, MapNode>> nodes;
+	for (const v3s16 &blockPos : blockPositions) {
+		MapBlock *block = map.getBlockNoCreate(blockPos);
+		if (!block)
+			continue;
+
+		v3s16 relNodePos;
+		for (relNodePos.Z = 0; relNodePos.Z < MAP_BLOCKSIZE; ++relNodePos.Z)
+		for (relNodePos.Y = 0; relNodePos.Y < MAP_BLOCKSIZE; ++relNodePos.Y)
+		for (relNodePos.X = 0; relNodePos.X < MAP_BLOCKSIZE; ++relNodePos.X) {
+			v3s16 absoluteNodePos = blockPos * MAP_BLOCKSIZE + relNodePos;
+			bool is_valid_position;
+			MapNode node = CSMGetNode(absoluteNodePos, &is_valid_position);
+			
+			if (is_valid_position)
+				nodes.push_back(std::make_pair(absoluteNodePos, node));
+		}
+	}
+
+	return nodes;
+}
+
+void Client::updateAllMapBlocks()
+{
+	v3s16 currentBlock = getNodeBlockPos(floatToInt(m_env.getLocalPlayer()->getPosition(), BS));
+
+	for (s16 X = currentBlock.X - 2; X <= currentBlock.X + 2; X++)
+	for (s16 Y = currentBlock.Y - 2; Y <= currentBlock.Y + 2; Y++)
+	for (s16 Z = currentBlock.Z - 2; Z <= currentBlock.Z + 2; Z++)
+		addUpdateMeshTask(v3s16(X, Y, Z), false, true);
+
+	Map &map = m_env.getMap();
+
+	std::vector<v3s16> positions;
+	map.listAllLoadedBlocks(positions);
+
+	for (v3s16 p : positions) {
+		addUpdateMeshTask(p, false, false);
 	}
 }
 

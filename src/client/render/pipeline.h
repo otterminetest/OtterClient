@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma once
 
 #include "irrlichttypes_extrabloated.h"
+#include "pipeline.h"
 
 #include <vector>
 #include <memory>

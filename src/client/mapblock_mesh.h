@@ -236,6 +236,8 @@ public:
 		return this->m_transparent_buffers;
 	}
 
+	std::set<v3s16> esp_nodes;
+
 private:
 	struct AnimationInfo {
 		int frame; // last animation frame

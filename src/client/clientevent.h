@@ -22,6 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string>
 #include "irrlichttypes_bloated.h"
 
+#include "hud.h"
+
 struct ParticleParameters;
 struct ParticleSpawnerParameters;
 struct SkyboxParams;

@@ -10,9 +10,6 @@ if(DEVELOPMENT_BUILD)
 		execute_process(COMMAND git diff-index --quiet HEAD
 			WORKING_DIRECTORY "${GENERATE_VERSION_SOURCE_DIR}"
 			RESULT_VARIABLE IS_DIRTY)
-		if(IS_DIRTY)
-			set(VERSION_GITHASH "${VERSION_GITHASH}-dirty")
-		endif()
 		message(STATUS "*** Detected Git version ${VERSION_GITHASH} ***")
 	endif()
 endif()

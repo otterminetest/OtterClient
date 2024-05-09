@@ -25,6 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "hud.h"
 #include "common/c_content.h"
 #include "client/content_cao.h"
+#include "client/client.h"
+#include "client/game.h"
 
 LuaLocalPlayer::LuaLocalPlayer(LocalPlayer *m) : m_localplayer(m)
 {
@@ -56,7 +58,7 @@ int LuaLocalPlayer::l_get_velocity(lua_State *L)
 {
 	LocalPlayer *player = getobject(L, 1);
 
-	push_v3f(L, player->getSpeed() / BS);
+	push_v3f(L, player->getSendSpeed() / BS);
 	return 1;
 }
 
@@ -65,6 +67,22 @@ int LuaLocalPlayer::l_get_hp(lua_State *L)
 	LocalPlayer *player = getobject(L, 1);
 
 	lua_pushinteger(L, player->hp);
+	return 1;
+}
+
+int LuaLocalPlayer::l_get_yaw(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	lua_pushnumber(L, player->getLegitYaw());
+	return 1;
+}
+
+int LuaLocalPlayer::l_get_pitch(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	lua_pushnumber(L, player->getLegitPitch());
 	return 1;
 }
 
@@ -279,7 +297,7 @@ int LuaLocalPlayer::l_get_pos(lua_State *L)
 {
 	LocalPlayer *player = getobject(L, 1);
 
-	push_v3f(L, player->getPosition() / BS);
+	push_v3f(L, player->getLegitPosition() / BS);
 	return 1;
 }
 
@@ -472,11 +490,99 @@ void LuaLocalPlayer::Register(lua_State *L)
 	registerClass(L, className, methods, metamethods);
 }
 
+
+/*
+SETTERS
+*/
+// set_velocity(self, velocity)
+int LuaLocalPlayer::l_set_velocity(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	v3f pos = checkFloatPos(L, 2);
+	player->setSpeed(pos);
+
+	return 0;
+}
+
+// set_yaw(self, yaw)
+int LuaLocalPlayer::l_set_yaw(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	if (lua_isnumber(L, 2)) {
+		double yaw = lua_tonumber(L, 2);
+		player->setLegitYaw(yaw);
+		if (!g_settings->getBool("freecam")) {
+			g_game->cam_view.camera_yaw = yaw;
+			g_game->cam_view_target.camera_yaw = yaw;
+		}
+	}
+
+	return 0;
+}
+
+// set_pitch(self, pitch)
+int LuaLocalPlayer::l_set_pitch(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	if (lua_isnumber(L, 2)) {
+		double pitch = lua_tonumber(L, 2);
+		player->setLegitPitch(pitch);
+		if (!g_settings->getBool("freecam")) {
+			g_game->cam_view.camera_pitch = pitch;
+			g_game->cam_view_target.camera_pitch = pitch;
+		}
+	}
+
+	return 0;
+}
+
+// set_wield_index(self, index)
+int LuaLocalPlayer::l_set_wield_index(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+	u32 index = luaL_checkinteger(L, 2) - 1;
+
+	player->setWieldIndex(index);
+	g_game->processItemSelection(&g_game->runData.new_playeritem);
+	ItemStack selected_item, hand_item;
+	ItemStack &tool_item = player->getWieldedItem(&selected_item, &hand_item);
+	g_game->camera->wield(tool_item);
+	return 0;
+}
+
+// set_pos(self, pos)
+int LuaLocalPlayer::l_set_pos(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	v3f pos = checkFloatPos(L, 2);
+	player->setLegitPosition(pos);
+	getClient(L)->sendPlayerPos();
+	return 0;
+}
+
+// get_pointed_thing()
+int LuaLocalPlayer::l_get_pointed_thing(lua_State *L)
+{
+	PointedThing pointed = g_game->runData.pointed_old;
+	if (pointed.type == POINTEDTHING_NODE) {
+		push_pointed_thing(L, pointed);
+		return 1;
+	}
+	lua_pushnil(L);
+	return 0;
+}
+
 const char LuaLocalPlayer::className[] = "LocalPlayer";
 const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, get_velocity),
 		luamethod(LuaLocalPlayer, get_hp),
 		luamethod(LuaLocalPlayer, get_name),
+		luamethod(LuaLocalPlayer, get_yaw),
+		luamethod(LuaLocalPlayer, get_pitch),
 		luamethod(LuaLocalPlayer, get_wield_index),
 		luamethod(LuaLocalPlayer, get_wielded_item),
 		luamethod(LuaLocalPlayer, is_attached),
@@ -506,6 +612,13 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, hud_get_all),
 
 		luamethod(LuaLocalPlayer, get_move_resistance),
+
+		luamethod(LuaLocalPlayer, set_velocity),
+		luamethod(LuaLocalPlayer, set_yaw),
+		luamethod(LuaLocalPlayer, set_pitch),
+		luamethod(LuaLocalPlayer, set_wield_index),
+		luamethod(LuaLocalPlayer, set_pos),
+		luamethod(LuaLocalPlayer, get_pointed_thing),
 
 		{0, 0}
 };

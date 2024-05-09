@@ -68,6 +68,7 @@ enum class ScriptingType: u8 {
 class Server;
 #ifndef SERVER
 class Client;
+class Game;
 #endif
 class EmergeThread;
 class IGameDef;
@@ -108,6 +109,7 @@ public:
 	Server* getServer();
 #ifndef SERVER
 	Client* getClient();
+	Game *getGame() { return m_game; }
 #endif
 
 	// IMPORTANT: These cannot be used for any security-related uses, they exist
@@ -168,6 +170,9 @@ protected:
 	void stackDump(std::ostream &o);
 
 	void setGameDef(IGameDef* gamedef) { m_gamedef = gamedef; }
+#ifndef SERVER
+	void setGame(Game *game) { m_game = game; }
+#endif
 
 	Environment* getEnv() { return m_environment; }
 	void setEnv(Environment* env) { m_environment = env; }
@@ -198,6 +203,9 @@ private:
 	lua_State      *m_luastack = nullptr;
 
 	IGameDef       *m_gamedef = nullptr;
+#ifndef SERVER
+	Game       	   *m_game = nullptr;
+#endif
 	Environment    *m_environment = nullptr;
 #ifndef SERVER
 	GUIEngine      *m_guiengine = nullptr;

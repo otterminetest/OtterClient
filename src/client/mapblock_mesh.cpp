@@ -74,7 +74,7 @@ void MeshMakeData::setCrack(int crack_level, v3s16 crack_pos)
 
 void MeshMakeData::setSmoothLighting(bool smooth_lighting)
 {
-	m_smooth_lighting = smooth_lighting;
+	m_smooth_lighting = false;
 }
 
 /*
@@ -90,7 +90,7 @@ static u8 getInteriorLight(enum LightBank bank, MapNode n, s32 increment,
 {
 	u8 light = n.getLight(bank, ndef->getLightingFlags(n));
 	light = rangelim(light + increment, 0, LIGHT_SUN);
-	return decode_light(light);
+	return 255; //decode_light(light);
 }
 
 /*
@@ -126,7 +126,7 @@ static u8 getFaceLight(enum LightBank bank, MapNode n, MapNode n2, const NodeDef
 	if(light_source > light)
 		light = light_source;
 
-	return decode_light(light);
+	return 255; //decode_light(light);
 }
 
 /*
@@ -444,6 +444,24 @@ void getNodeTile(MapNode mn, const v3s16 &p, const v3s16 &dir, MeshMakeData *dat
 	tile.rotation = tile.world_aligned ? TileRotation::None : dir_to_tile[facedir][dir_i].rotation;
 }
 
+std::set<content_t> splitToContentT(std::string str, const NodeDefManager *ndef)
+{
+	str += "\n";
+	std::set<content_t> dat;
+	std::string buf;
+	for (char c : str) {
+		if (c == ',' || c == '\n') {
+			if (! buf.empty()) {
+				dat.insert(ndef->getId(buf));
+			}
+			buf.clear();
+		} else if (c != ' ') {
+			buf += c;
+		}
+	}
+	return dat;
+}
+
 static void applyTileColor(PreMeshBuffer &pmb)
 {
 	video::SColor tc = pmb.layer.color;
@@ -643,6 +661,8 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data, v3s16 camera_offs
 	m_last_crack(-1),
 	m_last_daynight_ratio((u32) -1)
 {
+	std::set<content_t> nodeESPSet = splitToContentT(g_settings->get("node_esp_nodes"), data->nodedef);
+
 	for (auto &m : m_mesh)
 		m = new scene::SMesh();
 	m_enable_shaders = data->m_use_shaders;
@@ -663,6 +683,23 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data, v3s16 camera_offs
 				MinimapMapblock *block = new MinimapMapblock;
 				m_minimap_mapblocks[mesh_grid.getOffsetIndex(ofs)] = block;
 				block->getMinimapNodes(&data->m_vmanip, p);
+			}
+		}
+	}
+
+	/*
+		NodeESP
+	*/
+	{
+		v3s16 blockpos_nodes = data->m_blockpos * MAP_BLOCKSIZE;
+		for (s16 x = 0; x < MAP_BLOCKSIZE; x++) {
+			for (s16 y = 0; y < MAP_BLOCKSIZE; y++) {
+				for (s16 z = 0; z < MAP_BLOCKSIZE; z++) {
+					v3s16 pos = v3s16(x, y, z) + blockpos_nodes;
+					const MapNode &node = data->m_vmanip.getNodeRefUnsafeCheckFlags(pos);
+					if (nodeESPSet.find(node.getContent()) != nodeESPSet.end())
+						esp_nodes.insert(pos);
+				}
 			}
 		}
 	}

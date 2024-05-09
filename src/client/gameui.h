@@ -60,6 +60,7 @@ public:
 		bool show_minimal_debug = false;
 		bool show_basic_debug = false;
 		bool show_profiler_graph = false;
+		bool show_cheat_menu = true;
 	};
 
 	void init();
@@ -91,6 +92,7 @@ public:
 	void updateProfiler();
 
 	void toggleChat(Client *client);
+	void toggleCheatMenu();
 	void toggleHud();
 	void toggleProfiler();
 
@@ -112,6 +114,7 @@ private:
 
 	gui::IGUIStaticText *m_guitext = nullptr;  // First line of debug text
 	gui::IGUIStaticText *m_guitext2 = nullptr; // Second line of debug text
+	gui::IGUIStaticText *m_guitext_coords = nullptr;
 
 	gui::IGUIStaticText *m_guitext_info = nullptr; // At the middle of the screen
 	std::wstring m_infotext;

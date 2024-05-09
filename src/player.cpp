@@ -57,7 +57,7 @@ Player::Player(const char *name, IItemDefManager *idef):
 	movement_acceleration_air       = 2    * BS;
 	movement_acceleration_fast      = 10   * BS;
 	movement_speed_walk             = 4    * BS;
-	movement_speed_crouch           = 1.35 * BS;
+	movement_speed_crouch           = 4    * BS; //1.35
 	movement_speed_fast             = 20   * BS;
 	movement_speed_climb            = 2    * BS;
 	movement_speed_jump             = 6.5  * BS;
@@ -161,17 +161,86 @@ void Player::clearHud()
 
 u32 PlayerControl::getKeysPressed() const
 {
-	u32 keypress_bits =
-		( (u32)(jump  & 1) << 4) |
-		( (u32)(aux1  & 1) << 5) |
-		( (u32)(sneak & 1) << 6) |
-		( (u32)(dig   & 1) << 7) |
-		( (u32)(place & 1) << 8) |
-		( (u32)(zoom  & 1) << 9)
-	;
+	u32 keypress_bits;
+	if (g_settings->getBool("freecam")) {
+		keypress_bits =
+			(0 << 4) |
+			(0 << 5) |
+			(0 << 6) |
+			(0 << 7) |
+			(0 << 8) |
+			(0 << 9)
+		;
+	} else {
+		keypress_bits =
+			( (u32)(jump  & 1) << 4) |
+			( (u32)(aux1  & 1) << 5) |
+			( (u32)(sneak & 1) << 6) | //(0 << 6) | // Sneak is never pressed
+			( (u32)(dig   & 1) << 7) |
+			( (u32)(place & 1) << 8) |
+			( (u32)(zoom  & 1) << 9)
+		;
+	}
 
+	if (g_settings->getBool("freecam")) {}
 	// If any direction keys are pressed pass those through
-	if (direction_keys != 0)
+	else if (direction_keys != 0)
+	{
+		keypress_bits |= direction_keys;
+	}
+	// Otherwise set direction keys based on joystick movement (for mod compatibility)
+	else if (isMoving())
+	{
+		float abs_d;
+
+		// (absolute value indicates forward / backward)
+		abs_d = std::abs(movement_direction);
+		if (abs_d < 3.0f / 8.0f * M_PI)
+			keypress_bits |= (u32)1; // Forward
+		if (abs_d > 5.0f / 8.0f * M_PI)
+			keypress_bits |= (u32)1 << 1; // Backward
+
+		// rotate entire coordinate system by 90 degree
+		abs_d = movement_direction + M_PI_2;
+		if (abs_d >= M_PI)
+			abs_d -= 2 * M_PI;
+		abs_d = std::abs(abs_d);
+		// (value now indicates left / right)
+		if (abs_d < 3.0f / 8.0f * M_PI)
+			keypress_bits |= (u32)1 << 2; // Left
+		if (abs_d > 5.0f / 8.0f * M_PI)
+			keypress_bits |= (u32)1 << 3; // Right
+	}
+
+	return keypress_bits;
+}
+
+u32 PlayerControl::getKeysPressedAutoSneak() const
+{
+	u32 keypress_bits;
+	if (g_settings->getBool("freecam")) {
+		keypress_bits =
+			(0 << 4) |
+			(0 << 5) |
+			(1 << 6) |
+			(0 << 7) |
+			(0 << 8) |
+			(0 << 9)
+		;
+	} else {
+		keypress_bits =
+			( (u32)(jump  & 1) << 4) |
+			( (u32)(aux1  & 1) << 5) |
+			(1 << 6) |
+			( (u32)(dig   & 1) << 7) |
+			( (u32)(place & 1) << 8) |
+			( (u32)(zoom  & 1) << 9)
+		;
+	}
+
+	if (g_settings->getBool("freecam")) {}
+	// If any direction keys are pressed pass those through
+	else if (direction_keys != 0)
 	{
 		keypress_bits |= direction_keys;
 	}

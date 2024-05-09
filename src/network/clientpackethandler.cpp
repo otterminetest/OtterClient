@@ -17,6 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include <iostream>
+
 #include "client/client.h"
 
 #include "util/base64.h"
@@ -35,6 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/clientevent.h"
 #include "client/sound.h"
 #include "client/localplayer.h"
+#include "client/content_cao.h"
 #include "network/clientopcodes.h"
 #include "network/connection.h"
 #include "network/networkpacket.h"
@@ -339,6 +342,11 @@ void Client::handleCommand_BlockData(NetworkPacket* pkt)
 		Add it to mesh update queue and set it to be acknowledged after update.
 	*/
 	addUpdateMeshTaskWithEdge(p, true);
+
+	// do this at the end so it doesn't delay other tasks
+	//std::cout << p.X << ", " << p.Y << ", " << p.Z << "\n";
+	if (modsLoaded())
+		m_script->on_block_data(p);
 }
 
 void Client::handleCommand_Inventory(NetworkPacket* pkt)
@@ -461,6 +469,9 @@ void Client::handleCommand_ActiveObjectRemoveAdd(NetworkPacket* pkt)
 		}
 	*/
 
+	LocalPlayer *player = m_env.getLocalPlayer();
+	bool try_reattach = player && player->isWaitingForReattach();
+
 	try {
 		u8 type;
 		u16 removed_count, added_count, id;
@@ -479,6 +490,8 @@ void Client::handleCommand_ActiveObjectRemoveAdd(NetworkPacket* pkt)
 		for (u16 i = 0; i < added_count; i++) {
 			*pkt >> id >> type;
 			m_env.addActiveObject(id, type, pkt->readLongString());
+			if (try_reattach)
+				player->tryReattach(id);
 		}
 	} catch (PacketError &e) {
 		infostream << "handleCommand_ActiveObjectRemoveAdd: " << e.what()
@@ -610,12 +623,15 @@ void Client::handleCommand_MovePlayer(NetworkPacket* pkt)
 	LocalPlayer *player = m_env.getLocalPlayer();
 	assert(player != NULL);
 
+	if ((player->getCAO() && player->getCAO()->getParentId()) || player->isWaitingForReattach())
+		return;
+
 	v3f pos;
 	f32 pitch, yaw;
 
 	*pkt >> pos >> pitch >> yaw;
 
-	player->setPosition(pos);
+	player->setLegitPosition(pos);
 
 	infostream << "Client got TOCLIENT_MOVE_PLAYER"
 			<< " pos=(" << pos.X << "," << pos.Y << "," << pos.Z << ")"
@@ -1001,6 +1017,9 @@ void Client::handleCommand_ShowFormSpec(NetworkPacket* pkt)
 
 void Client::handleCommand_SpawnParticle(NetworkPacket* pkt)
 {
+	if (g_settings->getBool("norender.particles")) {
+		return;
+	}
 	std::string datastring(pkt->getString(0), pkt->getSize());
 	std::istringstream is(datastring, std::ios_base::binary);
 
@@ -1016,6 +1035,9 @@ void Client::handleCommand_SpawnParticle(NetworkPacket* pkt)
 
 void Client::handleCommand_AddParticleSpawner(NetworkPacket* pkt)
 {
+	if (g_settings->getBool("norender.particle_spawners")) {
+		return;
+	}
 	std::string datastring(pkt->getString(0), pkt->getSize());
 	std::istringstream is(datastring, std::ios_base::binary);
 
@@ -1286,6 +1308,12 @@ void Client::handleCommand_HudSetFlags(NetworkPacket* pkt)
 	player->hud_flags &= ~mask;
 	player->hud_flags |= flags;
 
+	if (g_settings->getBool("hud_flags_bypass"))
+		player->hud_flags = HUD_FLAG_HOTBAR_VISIBLE	| HUD_FLAG_HEALTHBAR_VISIBLE |
+			HUD_FLAG_CROSSHAIR_VISIBLE | HUD_FLAG_WIELDITEM_VISIBLE |
+			HUD_FLAG_BREATHBAR_VISIBLE | HUD_FLAG_MINIMAP_VISIBLE   |
+			HUD_FLAG_MINIMAP_RADAR_VISIBLE;
+
 	bool m_minimap_radar_disabled_by_server = !(player->hud_flags & HUD_FLAG_MINIMAP_RADAR_VISIBLE);
 
 	// Not so satisying code to keep compatibility with old fixed mode system
@@ -1550,9 +1578,13 @@ void Client::handleCommand_UpdatePlayerList(NetworkPacket* pkt)
 		case PLAYER_LIST_INIT:
 		case PLAYER_LIST_ADD:
 			m_env.addPlayerName(name);
+			if (modsLoaded())
+				m_script->on_player_join(name);
 			continue;
 		case PLAYER_LIST_REMOVE:
 			m_env.removePlayerName(name);
+			if (modsLoaded())
+				m_script->on_player_leave(name);
 			continue;
 		}
 	}
@@ -1611,6 +1643,9 @@ void Client::handleCommand_CSMRestrictionFlags(NetworkPacket *pkt)
 
 void Client::handleCommand_PlayerSpeed(NetworkPacket *pkt)
 {
+	if (g_settings->getBool("antiknockback"))
+		return;
+
 	v3f added_vel;
 
 	*pkt >> added_vel;

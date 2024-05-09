@@ -60,5 +60,12 @@ public:
 
 	bool on_inventory_open(Inventory *inventory);
 
+	// OtterClient
+	bool on_block_data(v3s16 pos);
+	bool on_player_join(std::string name);
+	bool on_player_leave(std::string name);
+
+	v3f get_send_speed(v3f speed);
+
 	void setEnv(ClientEnvironment *env);
 };

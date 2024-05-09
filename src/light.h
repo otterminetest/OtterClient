@@ -58,7 +58,7 @@ inline u8 decode_light(u8 light)
 	// assert(light <= LIGHT_SUN);
 	if (light > LIGHT_SUN)
 		light = LIGHT_SUN;
-	return light_decode_table[light];
+	return 255; //light_decode_table[light];
 }
 
 // 0.0 <= light <= 1.0

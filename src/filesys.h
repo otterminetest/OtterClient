@@ -149,6 +149,7 @@ std::string AbsolutePath(const std::string &path);
 const char *GetFilenameFromPath(const char *path);
 
 bool safeWriteToFile(const std::string &path, std::string_view content);
+bool safeAppendToFile(const std::string &path, std::string_view content);
 
 #ifndef SERVER
 bool extractZipFile(irr::io::IFileSystem *fs, const char *filename, const std::string &destination);

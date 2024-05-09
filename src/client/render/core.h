@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 #include "irrlichttypes_extrabloated.h"
+#include "pipeline.h"
 
 class ShadowRenderer;
 class Camera;
@@ -42,6 +43,16 @@ protected:
 	v2f virtual_size_scale;
 	v2u32 virtual_size { 0, 0 };
 
+	bool draw_entity_esp;
+	bool draw_entity_tracers;
+	bool draw_player_esp;
+	bool draw_player_tracers;
+	bool draw_node_esp;
+	bool draw_node_tracers;
+	video::SColor entity_esp_color;
+	video::SColor player_esp_color;
+	video::SColor self_esp_color;
+
 public:
 	RenderingCore(IrrlichtDevice *device, Client *client, Hud *hud,
 			ShadowRenderer *shadow_renderer, RenderPipeline *pipeline,
@@ -55,6 +66,14 @@ public:
 
 	void draw(video::SColor _skycolor, bool _show_hud,
 			bool _draw_wield_tool, bool _draw_crosshair);
+	void draw_HUD(video::SColor _skycolor, bool _show_hud,
+			bool _draw_wield_tool, bool _draw_crosshair);
+	void drawTracersAndESP();
+	void Draw3D(PipelineContext &context);
+	void DrawWield(PipelineContext &context);
+	void DrawHUD(PipelineContext &context);
+	void MapPostFxStep(PipelineContext &context);
+	void RenderShadowMapStep(PipelineContext &context);
 
 	v2u32 getVirtualSize() const;
 

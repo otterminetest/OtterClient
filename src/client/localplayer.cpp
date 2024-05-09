@@ -17,6 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include <iostream>
+
 #include "localplayer.h"
 #include <cmath>
 #include "mtevent.h"
@@ -27,25 +29,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "map.h"
 #include "client.h"
 #include "content_cao.h"
+#include "client/game.h"
 
 /*
 	PlayerSettings
 */
 
 const static std::string PlayerSettings_names[] = {
-	"free_move", "pitch_move", "fast_move", "continuous_forward", "always_fly_fast",
+	"freecam", "free_move", "pitch_move", "fast_move", "continuous_forward", "always_fly_fast",
 	"aux1_descends", "noclip", "autojump"
 };
 
 void PlayerSettings::readGlobalSettings()
 {
-	free_move = g_settings->getBool("free_move");
+	freecam = g_settings->getBool("freecam");
+	free_move = g_settings->getBool("free_move") || freecam;
 	pitch_move = g_settings->getBool("pitch_move");
-	fast_move = g_settings->getBool("fast_move");
+	fast_move = g_settings->getBool("fast_move") || freecam;
 	continuous_forward = g_settings->getBool("continuous_forward");
-	always_fly_fast = g_settings->getBool("always_fly_fast");
+	always_fly_fast = g_settings->getBool("always_fly_fast") || freecam;
 	aux1_descends = g_settings->getBool("aux1_descends");
-	noclip = g_settings->getBool("noclip");
+	noclip = g_settings->getBool("noclip") || freecam;
 	autojump = g_settings->getBool("autojump");
 }
 
@@ -230,6 +234,9 @@ bool LocalPlayer::updateSneakNode(Map *map, const v3f &position,
 void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 		std::vector<CollisionInfo> *collision_info)
 {
+	if (m_cao && m_cao->m_waiting_for_reattach > 0)
+		m_cao->m_waiting_for_reattach -= dtime;
+
 	// Node at feet position, update each ClientEnvironment::step()
 	if (!collision_info || collision_info->empty())
 		m_standing_node = floatToInt(m_position, BS);
@@ -255,9 +262,9 @@ void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 	PlayerSettings &player_settings = getPlayerSettings();
 
 	// Skip collision detection if noclip mode is used
-	bool fly_allowed = m_client->checkLocalPrivilege("fly");
-	bool noclip = m_client->checkLocalPrivilege("noclip") && player_settings.noclip;
-	bool free_move = player_settings.free_move && fly_allowed;
+	bool fly_allowed = m_client->checkLocalPrivilege("fly") || g_settings->getBool("freecam");
+	bool noclip = (m_client->checkLocalPrivilege("noclip") && player_settings.noclip) || g_settings->getBool("freecam");
+	bool free_move = (player_settings.free_move && fly_allowed) || g_settings->getBool("freecam");
 
 	if (noclip && free_move) {
 		position += m_speed * dtime;
@@ -338,6 +345,25 @@ void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 			nodemgr->get(node2.getContent()).climbable) && !free_move;
 	}
 
+	if (!is_climbing && !free_move && g_settings->getBool("spider")) {
+		v3s16 spider_positions[4] = {
+			floatToInt(position + v3f(+1.0f, +0.0f,  0.0f) * BS, BS),
+			floatToInt(position + v3f(-1.0f, +0.0f,  0.0f) * BS, BS),
+			floatToInt(position + v3f( 0.0f, +0.0f, +1.0f) * BS, BS),
+			floatToInt(position + v3f( 0.0f, +0.0f, -1.0f) * BS, BS),
+		};
+
+		for (v3s16 sp : spider_positions) {
+			bool is_valid;
+			MapNode node = map->getNode(sp, &is_valid);
+
+			if (is_valid && nodemgr->get(node.getContent()).walkable) {
+				is_climbing = true;
+				break;
+			}
+		}
+	}
+
 	/*
 		Collision uncertainty radius
 		Make it a bit larger than the maximum distance of movement
@@ -360,10 +386,9 @@ void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 
 	collisionMoveResult result = collisionMoveSimple(env, m_client,
 		pos_max_d, m_collisionbox, player_stepheight, dtime,
-		&position, &m_speed, accel_f);
+		&position, &m_speed, accel_f, NULL, true, true);
 
-	bool could_sneak = control.sneak && !free_move && !in_liquid &&
-		!is_climbing && physics_override.sneak;
+	bool could_sneak = control.sneak && !free_move && !in_liquid && !is_climbing && physics_override.sneak;
 
 	// Add new collisions to the vector
 	if (collision_info && !free_move) {
@@ -399,7 +424,7 @@ void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 		Player is allowed to jump when this is true.
 	*/
 	bool touching_ground_was = touching_ground;
-	touching_ground = result.touching_ground;
+	touching_ground = result.touching_ground || (g_settings->getBool("airjump") && !control.sneak);
 	bool sneak_can_jump = false;
 
 	// Max. distance (X, Z) over border for sneaking determined by collision box
@@ -414,7 +439,7 @@ void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 	/*
 		If sneaking, keep on top of last walked node and don't fall off
 	*/
-	if (could_sneak && m_sneak_node_exists) {
+	if (could_sneak && m_sneak_node_exists && !g_settings->getBool("autosneak")) {
 		const v3f sn_f = intToFloat(m_sneak_node, BS);
 		const v3f bmin = sn_f + m_sneak_node_bb_top.MinEdge;
 		const v3f bmax = sn_f + m_sneak_node_bb_top.MaxEdge;
@@ -586,6 +611,9 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 	// Whether superspeed mode is used or not
 	bool superspeed = false;
 
+	// Changable movement_speed_fast (cheat)
+	f32 new_speed_fast = g_settings->getFloat("movement_speed_fast") * BS;
+
 	if (always_fly_fast && free_move && fast_move)
 		superspeed = true;
 
@@ -600,7 +628,7 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 			if (free_move) {
 				// In free movement mode, aux1 descends
 				if (fast_move)
-					speedV.Y = -movement_speed_fast;
+					speedV.Y = -new_speed_fast;
 				else
 					speedV.Y = -movement_speed_walk;
 			} else if ((in_liquid || in_liquid_stable) && !m_disable_descend) {
@@ -632,18 +660,18 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 			if (free_move) {
 				// In free movement mode, sneak descends
 				if (fast_move && (control.aux1 || always_fly_fast))
-					speedV.Y = -movement_speed_fast;
+					speedV.Y = -new_speed_fast;
 				else
 					speedV.Y = -movement_speed_walk;
 			} else if ((in_liquid || in_liquid_stable) && !m_disable_descend) {
 				if (fast_climb)
-					speedV.Y = -movement_speed_fast;
+					speedV.Y = -new_speed_fast;
 				else
 					speedV.Y = -movement_speed_walk;
 				swimming_vertical = true;
 			} else if (is_climbing && !m_disable_descend) {
 				if (fast_climb)
-					speedV.Y = -movement_speed_fast;
+					speedV.Y = -new_speed_fast;
 				else
 					speedV.Y = -movement_speed_climb * physics_override.speed_climb;
 			}
@@ -662,41 +690,41 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 
 	if (control.jump) {
 		if (free_move) {
-			if (!control.sneak) {
+			//if (!control.sneak) {
 				// Don't fly up if sneak key is pressed
 				if (player_settings.aux1_descends || always_fly_fast) {
 					if (fast_move)
-						speedV.Y = movement_speed_fast;
+						speedV.Y = new_speed_fast;
 					else
 						speedV.Y = movement_speed_walk;
 				} else {
 					if (fast_move && control.aux1)
-						speedV.Y = movement_speed_fast;
+						speedV.Y = new_speed_fast;
 					else
 						speedV.Y = movement_speed_walk;
 				}
-			}
-		} else if (m_can_jump) {
+			//}
+		} else if (m_can_jump || g_settings->getBool("jetpack")) {
 			/*
 				NOTE: The d value in move() affects jump height by
 				raising the height at which the jump speed is kept
 				at its starting value
 			*/
 			v3f speedJ = getSpeed();
-			if (speedJ.Y >= -0.5f * BS) {
+			if (speedJ.Y >= -0.5f * BS || g_settings->getBool("jetpack")) {
 				speedJ.Y = movement_speed_jump * physics_override.jump;
 				setSpeed(speedJ);
 				m_client->getEventManager()->put(new SimpleTriggerEvent(MtEvent::PLAYER_JUMP));
 			}
 		} else if (in_liquid && !m_disable_jump && !control.sneak) {
 			if (fast_climb)
-				speedV.Y = movement_speed_fast;
+				speedV.Y = new_speed_fast;
 			else
 				speedV.Y = movement_speed_walk;
 			swimming_vertical = true;
 		} else if (is_climbing && !m_disable_jump && !control.sneak) {
 			if (fast_climb)
-				speedV.Y = movement_speed_fast;
+				speedV.Y = new_speed_fast;
 			else
 				speedV.Y = movement_speed_climb * physics_override.speed_climb;
 		}
@@ -705,8 +733,8 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 	// The speed of the player (Y is ignored)
 	if (superspeed || (is_climbing && fast_climb) ||
 			((in_liquid || in_liquid_stable) && fast_climb))
-		speedH = speedH.normalize() * movement_speed_fast;
-	else if (control.sneak && !free_move && !in_liquid && !in_liquid_stable)
+		speedH = speedH.normalize() * new_speed_fast;
+	else if (control.sneak && !free_move && !in_liquid && !in_liquid_stable && !g_settings->getBool("no_slow"))
 		speedH = speedH.normalize() * movement_speed_crouch * physics_override.speed_crouch;
 	else
 		speedH = speedH.normalize() * movement_speed_walk;
@@ -780,6 +808,16 @@ v3s16 LocalPlayer::getLightPosition() const
 	return floatToInt(m_position + v3f(0.0f, BS * 1.5f, 0.0f), BS);
 }
 
+v3f LocalPlayer::getSendSpeed()
+{
+	v3f speed = getLegitSpeed();
+
+	if (m_client->modsLoaded())
+		speed = m_client->getScript()->get_send_speed(speed);
+
+	return speed;
+}
+
 v3f LocalPlayer::getEyeOffset() const
 {
 	return v3f(0.0f, BS * m_eye_height, 0.0f);
@@ -794,6 +832,18 @@ bool LocalPlayer::isDead() const
 {
 	FATAL_ERROR_IF(!getCAO(), "LocalPlayer's CAO isn't initialized");
 	return !getCAO()->isImmortal() && hp == 0;
+}
+
+void LocalPlayer::tryReattach(int id)
+{
+	PointedThing pointed(id, v3f(0, 0, 0), v3f(0, 0, 0), v3f(0, 0, 0), 0, PointabilityType::POINTABLE);
+	m_client->interact(INTERACT_PLACE, pointed);
+	m_cao->m_waiting_for_reattach = 10;
+}
+
+bool LocalPlayer::isWaitingForReattach() const
+{
+	return g_settings->getBool("entity_speed") && m_cao && ! m_cao->getParent() && m_cao->m_waiting_for_reattach > 0;
 }
 
 // 3D acceleration
@@ -858,9 +908,9 @@ void LocalPlayer::old_move(f32 dtime, Environment *env, f32 pos_max_d,
 	PlayerSettings &player_settings = getPlayerSettings();
 
 	// Skip collision detection if noclip mode is used
-	bool fly_allowed = m_client->checkLocalPrivilege("fly");
-	bool noclip = m_client->checkLocalPrivilege("noclip") && player_settings.noclip;
-	bool free_move = noclip && fly_allowed && player_settings.free_move;
+	bool fly_allowed = m_client->checkLocalPrivilege("fly") || g_settings->getBool("freecam");;
+	bool noclip = (m_client->checkLocalPrivilege("noclip") && player_settings.noclip) || g_settings->getBool("freecam");;
+	bool free_move = (noclip && fly_allowed && player_settings.free_move) || g_settings->getBool("freecam");;
 	if (free_move) {
 		position += m_speed * dtime;
 		setPosition(position);
@@ -936,6 +986,25 @@ void LocalPlayer::old_move(f32 dtime, Environment *env, f32 pos_max_d,
 		is_climbing = (nodemgr->get(node.getContent()).climbable ||
 			nodemgr->get(node2.getContent()).climbable) && !free_move;
 
+	if (!is_climbing && !free_move && g_settings->getBool("spider")) {
+		v3s16 spider_positions[4] = {
+			floatToInt(position + v3f(+1.0f, +0.0f,  0.0f) * BS, BS),
+			floatToInt(position + v3f(-1.0f, +0.0f,  0.0f) * BS, BS),
+			floatToInt(position + v3f( 0.0f, +0.0f, +1.0f) * BS, BS),
+			floatToInt(position + v3f( 0.0f, +0.0f, -1.0f) * BS, BS),
+		};
+
+		for (v3s16 sp : spider_positions) {
+			bool is_valid;
+			MapNode node = map->getNode(sp, &is_valid);
+
+			if (is_valid && nodemgr->get(node.getContent()).walkable) {
+				is_climbing = true;
+				break;
+			}
+		}
+	}
+
 	/*
 		Collision uncertainty radius
 		Make it a bit larger than the maximum distance of movement
@@ -999,7 +1068,7 @@ void LocalPlayer::old_move(f32 dtime, Environment *env, f32 pos_max_d,
 		Player is allowed to jump when this is true.
 	*/
 	bool touching_ground_was = touching_ground;
-	touching_ground = result.touching_ground;
+	touching_ground = result.touching_ground || (g_settings->getBool("airjump") && !control.sneak);
 
 	//bool standing_on_unloaded = result.standing_on_unloaded;
 
@@ -1177,7 +1246,7 @@ float LocalPlayer::getSlipFactor(Environment *env, const v3f &speedH)
 	Map *map = &env->getMap();
 	const ContentFeatures &f = nodemgr->get(map->getNode(getStandingNodePos()));
 	int slippery = 0;
-	if (f.walkable)
+	if (f.walkable && !g_settings->getBool("antislip"))
 		slippery = itemgroup_get(f.groups, "slippery");
 
 	if (slippery >= 1) {

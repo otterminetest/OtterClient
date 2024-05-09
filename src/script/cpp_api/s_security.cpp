@@ -800,7 +800,7 @@ int ScriptApiSecurity::sl_g_loadstring(lua_State *L)
 int ScriptApiSecurity::sl_g_require(lua_State *L)
 {
 	lua_pushliteral(L, "require() is disabled when mod security is on.");
-	return lua_error(L);
+	lua_error(L);
 }
 
 

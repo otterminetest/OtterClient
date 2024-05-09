@@ -119,6 +119,8 @@ compile_commands.json
 *.sln
 .vs/
 
+Find results
+
 # Old irrlichtmt. Still ignored to make bisecting easier.
 lib/irrlichtmt
 
