@@ -5,7 +5,7 @@ A minetest cheat client based off of DragonFire client but on Minetest version [
 
 Also, used code from [WaspSaliva](https://repo.or.cz/waspsaliva.git) for circular cheat menus.
 
-Made by *the* Otter. Here's me:
+Made by *the* Otter. Here's me:      
 ![otter](https://avatars.githubusercontent.com/u/168836394)
 
 Compiling
