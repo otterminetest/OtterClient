@@ -63,7 +63,7 @@ class MapblockMeshGenerator
 public:
 	MapblockMeshGenerator(MeshMakeData *input, MeshCollector *output,
 			scene::IMeshManipulator *mm);
-	void generate();
+	void generate(std::set<content_t> xraySet);
 	void renderSingle(content_t node, u8 param2 = 0x00);
 
 private:
@@ -172,7 +172,7 @@ private:
 		float offset_h, float offset_v = 0.0);
 
 // drawtypes
-	void drawSolidNode();
+	void drawSolidNode(std::set<content_t> xraySet);
 	void drawLiquidNode();
 	void drawGlasslikeNode();
 	void drawGlasslikeFramedNode();
@@ -190,4 +190,5 @@ private:
 // common
 	void errorUnknownDrawtype();
 	void drawNode();
+	void drawNode(std::set<content_t> xraySet);
 };

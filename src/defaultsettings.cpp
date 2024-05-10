@@ -150,6 +150,8 @@ void set_default_settings()
 	settings->setDefault("cheat_menu_entry_width", "150");
 
 	// Cheats
+	settings->setDefault("xray", "false");
+	settings->setDefault("xray_nodes", "default:stone,mcl_core:stone");
 	settings->setDefault("autosneak", "false");
 	settings->setDefault("instant_break", "false");
 	settings->setDefault("antiknockback", "false");

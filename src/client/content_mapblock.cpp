@@ -406,7 +406,7 @@ void MapblockMeshGenerator::drawAutoLightedCuboid(aabb3f box, const f32 *txc,
 	}
 }
 
-void MapblockMeshGenerator::drawSolidNode()
+void MapblockMeshGenerator::drawSolidNode(std::set<content_t> xraySet)
 {
 	u8 faces = 0; // k-th bit will be set if k-th face is to be drawn.
 	static const v3s16 tile_dirs[6] = {
@@ -424,6 +424,8 @@ void MapblockMeshGenerator::drawSolidNode()
 		v3s16 p2 = blockpos_nodes + cur_node.p + tile_dirs[face];
 		MapNode neighbor = data->m_vmanip.getNodeNoEx(p2);
 		content_t n2 = neighbor.getContent();
+		if (xraySet.find(n2) != xraySet.end())
+			n2 = CONTENT_AIR;
 		bool backface_culling = cur_node.f->drawtype == NDT_NORMAL;
 		if (n2 == n1)
 			continue;
@@ -1249,7 +1251,8 @@ void MapblockMeshGenerator::drawPlantlikeNode()
 
 void MapblockMeshGenerator::drawPlantlikeRootedNode()
 {
-	drawSolidNode();
+	std::set<content_t> emptyXraySet;
+	drawSolidNode(emptyXraySet);
 	useTile(0, MATERIAL_FLAG_CRACK_OVERLAY, 0, true);
 	cur_node.origin += v3f(0.0, BS, 0.0);
 	cur_node.p.Y++;
@@ -1710,12 +1713,18 @@ void MapblockMeshGenerator::errorUnknownDrawtype()
 
 void MapblockMeshGenerator::drawNode()
 {
+	std::set<content_t> emptyXraySet;
+	drawNode(emptyXraySet);
+}
+
+void MapblockMeshGenerator::drawNode(std::set<content_t> xraySet)
+{
 	switch (cur_node.f->drawtype) {
 		case NDT_AIRLIKE:  // Not drawn at all
 			return;
 		case NDT_LIQUID:
 		case NDT_NORMAL: // solid nodes don’t need the usual setup
-			drawSolidNode();
+			drawSolidNode(xraySet);
 			return;
 		default:
 			break;
@@ -1743,14 +1752,16 @@ void MapblockMeshGenerator::drawNode()
 	}
 }
 
-void MapblockMeshGenerator::generate()
+void MapblockMeshGenerator::generate(std::set<content_t> xraySet)
 {
 	for (cur_node.p.Z = 0; cur_node.p.Z < data->side_length; cur_node.p.Z++)
 	for (cur_node.p.Y = 0; cur_node.p.Y < data->side_length; cur_node.p.Y++)
 	for (cur_node.p.X = 0; cur_node.p.X < data->side_length; cur_node.p.X++) {
 		cur_node.n = data->m_vmanip.getNodeNoEx(blockpos_nodes + cur_node.p);
 		cur_node.f = &nodedef->get(cur_node.n);
-		drawNode();
+		content_t node_content = cur_node.n.getContent();
+		if (xraySet.empty() || xraySet.find(node_content) == xraySet.end())
+			drawNode(xraySet);
 	}
 }
 

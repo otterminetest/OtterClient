@@ -704,6 +704,14 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data, v3s16 camera_offs
 		}
 	}
 
+	/*
+	  X-Ray settings
+	*/
+	std::set<content_t> xraySet;
+	if (g_settings->getBool("xray"))
+		xraySet = splitToContentT(
+			g_settings->get("xray_nodes"), data->nodedef);
+
 	v3f offset = intToFloat((data->m_blockpos - mesh_grid.getMeshPos(data->m_blockpos)) * MAP_BLOCKSIZE, BS);
 	MeshCollector collector(m_bounding_sphere_center, offset);
 	/*
@@ -716,7 +724,7 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data, v3s16 camera_offs
 
 	{
 		MapblockMeshGenerator(data, &collector,
-			client->getSceneManager()->getMeshManipulator()).generate();
+			client->getSceneManager()->getMeshManipulator()).generate(xraySet);
 	}
 
 	/*

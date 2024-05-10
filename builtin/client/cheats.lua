@@ -20,7 +20,7 @@ core.cheats = {
 		["AutoSneak"] = "autosneak",
 	},
 	["Render"] = {
-		--["Xray"] = "xray",
+		["Xray"] = "xray",
 		--["Fullbright"] = "fullbright",
 		["HUDBypass"] = "hud_flags_bypass",
 		--["NoHurtCam"] = "no_hurt_cam",

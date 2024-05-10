@@ -191,7 +191,8 @@ void TestMapblockMeshGenerator::testSimpleNode()
 
 	MeshCollector col{{}};
 	MapblockMeshGenerator mg{&data, &col, nullptr};
-	mg.generate();
+	std::set<content_t> xraySet;
+	mg.generate(xraySet);
 	UASSERTEQ(std::size_t, col.prebuffers[0].size(), 1);
 	UASSERTEQ(std::size_t, col.prebuffers[1].size(), 0);
 
@@ -213,7 +214,8 @@ void TestMapblockMeshGenerator::testSurroundedNode()
 
 	MeshCollector col{{}};
 	MapblockMeshGenerator mg{&data, &col, nullptr};
-	mg.generate();
+	std::set<content_t> xraySet;
+	mg.generate(xraySet);
 	UASSERTEQ(std::size_t, col.prebuffers[0].size(), 1);
 	UASSERTEQ(std::size_t, col.prebuffers[1].size(), 0);
 
@@ -234,7 +236,8 @@ void TestMapblockMeshGenerator::testInterliquidSame()
 
 	MeshCollector col{{}};
 	MapblockMeshGenerator mg{&data, &col, nullptr};
-	mg.generate();
+	std::set<content_t> xraySet;
+	mg.generate(xraySet);
 	UASSERTEQ(std::size_t, col.prebuffers[0].size(), 1);
 	UASSERTEQ(std::size_t, col.prebuffers[1].size(), 0);
 
@@ -256,7 +259,8 @@ void TestMapblockMeshGenerator::testInterliquidDifferent()
 
 	MeshCollector col{{}};
 	MapblockMeshGenerator mg{&data, &col, nullptr};
-	mg.generate();
+	std::set<content_t> xraySet;
+	mg.generate(xraySet);
 	UASSERTEQ(std::size_t, col.prebuffers[0].size(), 1);
 	UASSERTEQ(std::size_t, col.prebuffers[1].size(), 0);
 
