@@ -54,6 +54,7 @@ AppDir
 !/games/devtest/mods/soundstuff/sounds/gitignored_sounds/custom_sounds_here.txt
 /cache
 /textures/*
+!/textures/texture_packs_here.txt
 !/textures/base/
 /screenshots
 /sounds
