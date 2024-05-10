@@ -306,8 +306,10 @@ bool ScriptApiClient::on_block_data(v3s16 pos)
 	// Call functions
 	try {
 		runCallbacks(1, RUN_CALLBACKS_MODE_OR_SC);
+		return true;
 	} catch (LuaError &e) {
 		getClient()->setFatalError(e);
+		return false;
 	}
 }
 
