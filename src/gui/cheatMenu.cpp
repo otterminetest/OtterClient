@@ -209,7 +209,7 @@ void CheatMenu::drawHUD(video::IVideoDriver *driver, double dtime)
 
 	m_rainbow_offset += dtime;
 
-	m_rainbow_offset = std::fmodf(m_rainbow_offset, 6.0f);
+	m_rainbow_offset = fmod(m_rainbow_offset, 6.0f);
 
 	std::vector<std::string> enabled_cheats;
 

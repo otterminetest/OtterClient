@@ -105,7 +105,7 @@ void ScriptApiCheats::init_cheats()
     lua_pushnil(L);  // First key
     while (lua_next(L, -2) != 0) {
         if (lua_isstring(L, -2)) {
-            keys.emplace_back(lua_tostring(L, -2));
+            keys.push_back(lua_tostring(L, -2));
         }
         lua_pop(L, 1);
     }
