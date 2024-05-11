@@ -229,6 +229,9 @@ void CheatMenu::drawHUD(video::IVideoDriver *driver, double dtime)
 	if (enabled_cheats.empty())
 		return;
 
+    // Sorting enabled_cheats
+    std::sort(enabled_cheats.begin(), enabled_cheats.end());
+
 	std::vector<video::SColor> colors;
 
 	for (int i = 0; i < cheat_count; i++) {

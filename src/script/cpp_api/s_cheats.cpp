@@ -66,6 +66,8 @@ ScriptApiCheatsCategory::~ScriptApiCheatsCategory()
 
 void ScriptApiCheatsCategory::read_cheats(lua_State *L)
 {
+	std::vector<std::pair<std::string, ScriptApiCheatsCheat*>> cheat_pairs;
+
 	lua_pushnil(L);
 	while (lua_next(L, -2)) {
 		ScriptApiCheatsCheat *cheat = nullptr;
@@ -78,8 +80,16 @@ void ScriptApiCheatsCategory::read_cheats(lua_State *L)
 			lua_pushnil(L);
 		}
 		if (cheat)
-			m_cheats.push_back(cheat);
+			cheat_pairs.emplace_back(name, cheat);
 		lua_pop(L, 1);
+	}
+
+	// Sorting cheats
+	std::sort(cheat_pairs.begin(), cheat_pairs.end());
+
+	// Assigning sorted cheats to m_cheats
+	for (const auto &pair : cheat_pairs) {
+		m_cheats.push_back(pair.second);
 	}
 }
 
