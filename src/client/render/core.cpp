@@ -119,11 +119,10 @@ void RenderingCore::drawTracersAndESP()
 	driver->setMaterial(material);
 
  	if (draw_entity_esp || draw_entity_tracers || draw_player_esp || draw_player_tracers) {
- 		v3f current_pos = client->getEnv().getLocalPlayer()->getPosition();
- 		std::vector<DistanceSortedActiveObject> allObjects;
-		env.getAllActiveObjects(current_pos, allObjects);
-		for (auto &clientobject : allObjects) {
-			ClientActiveObject *cao = clientobject.obj;
+		std::unordered_map<u16, ClientActiveObject*> allObjects;
+		env.getAllActiveObjects(allObjects);
+		for (auto &ao_it : allObjects) {
+			ClientActiveObject *cao = ao_it.second;
 			if ((cao->isLocalPlayer() && !g_settings->getBool("freecam")) || cao->getParent())
 				continue;
 			GenericCAO *obj = dynamic_cast<GenericCAO *>(cao);

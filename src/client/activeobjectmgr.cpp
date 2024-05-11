@@ -105,18 +105,11 @@ void ActiveObjectMgr::getActiveObjects(const v3f &origin, f32 max_d,
 	}
 }
 
-void ActiveObjectMgr::getAllActiveObjects(const v3f &origin,
-		std::vector<DistanceSortedActiveObject> &dest)
+void ActiveObjectMgr::getAllActiveObjects(std::unordered_map<u16, ClientActiveObject*> &dest)
 {
-	for (auto &ao_it : m_active_objects.iter()) {
-		ClientActiveObject *obj = ao_it.second.get();
-		if (!obj)
-			continue;
-
-		f32 d2 = (obj->getPosition() - origin).getLengthSQ();
-
-		dest.emplace_back(obj, d2);
-	}
+    for (auto &ao_it : m_active_objects.iter()) {
+        dest[ao_it.first] = ao_it.second.get();
+    }
 }
 
 std::vector<DistanceSortedActiveObject> ActiveObjectMgr::getActiveSelectableObjects(const core::line3d<f32> &shootline)

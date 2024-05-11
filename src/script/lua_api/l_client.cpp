@@ -534,13 +534,15 @@ int ModApiClient::l_get_all_objects(lua_State *L)
 
 	v3f pos = checkFloatPos(L, 1);
 
-	std::vector<DistanceSortedActiveObject> objs;
-	env.getAllActiveObjects(pos, objs);
+	std::unordered_map<u16, ClientActiveObject*> objs;
+	env.getAllActiveObjects(objs);
 
 	int i = 0;
 	lua_createtable(L, objs.size(), 0);
-	for (const auto obj : objs) {
-		push_objectRef(L, obj.obj->getId());
+	for (auto &ao_it : objs) {
+		ClientActiveObject *cao = ao_it.second;
+		GenericCAO *obj = dynamic_cast<GenericCAO *>(cao);
+		push_objectRef(L, obj->getId());
 		lua_rawseti(L, -2, ++i);
 	}
 	return 1;
