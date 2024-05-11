@@ -1577,7 +1577,7 @@ std::vector<std::pair<v3s16, MapNode>> Client::getNodesAtBlockPos(v3s16 blockPos
 		MapNode node = CSMGetNode(absoluteNodePos, &is_valid_position);
 		
 		if (is_valid_position)
-			nodes.push_back(std::make_pair(absoluteNodePos, node));
+			nodes.emplace_back(std::make_pair(absoluteNodePos, node));
 	}
 
 	return nodes;
@@ -1604,7 +1604,7 @@ std::vector<std::pair<v3s16, MapNode>> Client::getAllLoadedNodes()
 			MapNode node = CSMGetNode(absoluteNodePos, &is_valid_position);
 			
 			if (is_valid_position)
-				nodes.push_back(std::make_pair(absoluteNodePos, node));
+				nodes.emplace_back(std::make_pair(absoluteNodePos, node));
 		}
 	}
 
