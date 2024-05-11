@@ -157,7 +157,6 @@ void set_default_settings()
 	settings->setDefault("antiknockback", "false");
 	settings->setDefault("float_above_parent", "false");
 	settings->setDefault("freecam", "false");
-	settings->setDefault("entity_speed", "false");
 	settings->setDefault("norender.particles", "true");
 	settings->setDefault("norender.particle_spawners", "true");
 	settings->setDefault("jesus", "false");
@@ -182,6 +181,9 @@ void set_default_settings()
 	settings->setDefault("autohit", "false");
 	settings->setDefault("fastplace", "false");
 	settings->setDefault("autoplace", "false");
+	settings->setDefault("prevent_natural_damage", "true");
+	settings->setDefault("coords", "true");
+	settings->setDefault("fullbright", "true");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");

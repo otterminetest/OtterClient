@@ -21,11 +21,10 @@ core.cheats = {
 	},
 	["Render"] = {
 		["Xray"] = "xray",
-		--["Fullbright"] = "fullbright",
+		["Fullbright"] = "fullbright",
 		["HUDBypass"] = "hud_flags_bypass",
 		--["NoHurtCam"] = "no_hurt_cam",
-		--["BrightNight"] = "no_night",
-		--["Coords"] = "coords",
+		["Coords"] = "coords",
 		["CheatHUD"] = "cheat_hud",
 		["EntityESP"] = "enable_entity_esp",
 		["EntityTracers"] = "enable_entity_tracers",
@@ -44,15 +43,11 @@ core.cheats = {
 		["FastHit"] = "spamclick",
 		["AutoHit"] = "autohit",
 	},
-	--["Exploit"] = {
-	--	["EntitySpeed"] = "entity_speed",
-	--},
 	["Player"] = {
-		--["NoFallDamage"] = "prevent_natural_damage",
+		["NoFallDamage"] = "prevent_natural_damage",
 		--["NoForceRotate"] = "no_force_rotate",
 		--["Reach"] = "reach",
 		--["PointLiquids"] = "point_liquids",
-		--["PrivBypass"] = "priv_bypass",
 		["AutoRespawn"] = "autorespawn",
 		--["ThroughWalls"] = "dont_point_nodes",
 	}

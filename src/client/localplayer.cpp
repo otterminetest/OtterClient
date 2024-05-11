@@ -843,7 +843,7 @@ void LocalPlayer::tryReattach(int id)
 
 bool LocalPlayer::isWaitingForReattach() const
 {
-	return g_settings->getBool("entity_speed") && m_cao && ! m_cao->getParent() && m_cao->m_waiting_for_reattach > 0;
+	return m_cao && ! m_cao->getParent() && m_cao->m_waiting_for_reattach > 0;
 }
 
 // 3D acceleration

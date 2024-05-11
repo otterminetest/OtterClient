@@ -136,6 +136,8 @@ Game::Game() :
 		&updateAllMapBlocksCallback, this);
 	g_settings->registerChangedCallback("node_esp_nodes",
 		&updateAllMapBlocksCallback, this);
+	g_settings->registerChangedCallback("fullbright",
+		&updateAllMapBlocksCallback, this);
 
 	readSettings();
 }
@@ -212,6 +214,8 @@ Game::~Game()
 	g_settings->deregisterChangedCallback("xray_nodes",
 		&updateAllMapBlocksCallback, this);
 	g_settings->deregisterChangedCallback("node_esp_nodes",
+		&updateAllMapBlocksCallback, this);
+	g_settings->deregisterChangedCallback("fullbright",
 		&updateAllMapBlocksCallback, this);
 
 	if (m_rendering_engine)

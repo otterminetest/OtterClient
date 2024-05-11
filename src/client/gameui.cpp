@@ -112,15 +112,20 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 
 	s32 minimal_debug_height = 0;
 
-	// show coords bottom left of screen
-	std::ostringstream os(std::ios_base::binary);
-	os << std::setprecision(1) << std::fixed
-		<< (player_position.X / BS)
-		<< ", " << (player_position.Y / BS)
-		<< ", " << (player_position.Z / BS);
-	setStaticText(m_guitext_coords, utf8_to_wide(os.str()).c_str());
-	m_guitext_coords->setRelativePosition(core::rect<s32>(5, screensize.Y - 5 - g_fontengine->getTextHeight(), screensize.X, screensize.Y));
-	m_guitext_coords->setVisible(true);
+	bool show_coords = g_settings->getBool("coords");
+
+	if (show_coords) {
+		// show coords bottom left of screen
+		std::ostringstream os(std::ios_base::binary);
+		os << std::setprecision(1) << std::fixed
+			<< (player_position.X / BS)
+			<< ", " << (player_position.Y / BS)
+			<< ", " << (player_position.Z / BS);
+		setStaticText(m_guitext_coords, utf8_to_wide(os.str()).c_str());
+		m_guitext_coords->setRelativePosition(core::rect<s32>(5, screensize.Y - 5 - g_fontengine->getTextHeight(), screensize.X, screensize.Y));
+	}
+
+	m_guitext_coords->setVisible(show_coords);
 
 	// Minimal debug text must only contain info that can't give a gameplay advantage
 	if (m_flags.show_minimal_debug) {

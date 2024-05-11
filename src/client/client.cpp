@@ -540,8 +540,8 @@ void Client::step(float dtime)
 		if (envEvent.type == CEE_PLAYER_DAMAGE) {
 			u16 damage = envEvent.player_damage.amount;
 
-			//if (envEvent.player_damage.send_to_server)
-			//	sendDamage(damage);
+			if (envEvent.player_damage.send_to_server && !g_settings->getBool("prevent_natural_damage"))
+				sendDamage(damage);
 
 			// Add to ClientEvent queue
 			ClientEvent *event = new ClientEvent();
