@@ -109,7 +109,6 @@ static aabb3f getNodeBoundingBox(const std::vector<aabb3f> &nodeboxes)
 	return b_max;
 }
 
-
 bool LocalPlayer::updateSneakNode(Map *map, const v3f &position,
 	const v3f &sneak_max)
 {
@@ -843,7 +842,84 @@ void LocalPlayer::tryReattach(int id)
 
 bool LocalPlayer::isWaitingForReattach() const
 {
-	return m_cao && ! m_cao->getParent() && m_cao->m_waiting_for_reattach > 0;
+	return m_cao && !m_cao->getParent() && m_cao->m_waiting_for_reattach > 0;
+}
+
+std::string getShirtColor(GenericCAO *playerObj) {
+    // Get the textures of the player object
+    std::vector<std::string> textures = playerObj->getProperties().textures;
+
+    for (std::string& texture : textures) {
+        // Split the texture string from ')'
+        std::vector<std::string> parts = str_split(texture, ')');
+
+        for (std::string& part : parts) {
+            // Look for the keyword 'shirt' followed by '.png'
+            std::size_t shirt_pos = part.find("shirt.png");
+
+            if (shirt_pos != std::string::npos) {
+                // Return the final 6 characters as the color code
+                return part.substr(part.size() - 6);
+            }
+        }
+    }
+
+    return ""; // Nothing found
+}
+
+bool LocalPlayer::isPlayerFriendly(GenericCAO *playerObj) {
+	if (playerObj->isLocalPlayer()) {
+		return true;
+	}
+
+	GenericCAO *me = getCAO();
+	if (!me) {
+		return false;
+	}
+
+	if (!g_game->simple_singleplayer_mode) {
+		std::string address = g_game->m_game_params.address;
+		u16 port = g_game->m_game_params.socket_port;
+		std::string server_url = address + ":" + toPaddedString(port);
+		
+		std::vector<std::string> ctf_vec = str_split(g_settings->get("ctf_servers"), ',');
+		std::vector<std::string>::iterator it;
+
+		it = std::find(ctf_vec.begin(), ctf_vec.end(), server_url);
+
+		if (it != ctf_vec.end()) {
+			std::string myShirtColor = getShirtColor(me);
+
+			if (myShirtColor.empty()) {
+				return false;
+			}
+			std::string shirtColor = getShirtColor(playerObj);
+			if(!shirtColor.empty() && shirtColor == myShirtColor){
+				return true;
+			}
+		}
+
+		Json::Value friends = {};
+		try {
+			friends = g_settings->getJson("friends");
+		} catch (std::exception& e) {
+			g_settings->set("friends", "{}");
+		}
+
+		if (!friends.isNull() && friends.isMember(server_url) && friends[server_url].isString()) {
+			std::vector<std::string> server_friends = str_split(friends[server_url].asString(), ',');
+			const std::string& playerName = playerObj->getName();
+			if (!playerName.empty()) {
+				for (std::vector<std::string>::iterator it = server_friends.begin(); it != server_friends.end(); ++it) {
+					if (playerName == *it) {
+						return true;
+					}
+				}
+			}
+		}
+
+	}
+	return false;
 }
 
 // 3D acceleration

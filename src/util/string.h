@@ -33,6 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <iomanip>
 #include <cctype>
 #include <unordered_map>
+#include <json/json.h>
 
 class Translations;
 
@@ -776,3 +777,19 @@ void safe_print_string(std::ostream &os, std::string_view str);
  * @return float vector
  */
 v3f str_to_v3f(std::string_view str);
+
+/**
+ * Parses a Json string to Json::Value
+ *
+ * @param str string
+ * @return Json::Value object
+ */
+Json::Value str_to_json(std::string_view str);
+
+/**
+ * Pad a string with 0s so the length is at least 4, to convert u16 port num to string
+ *
+ * @param u16 number
+ * @return std::string string
+ */
+std::string toPaddedString(uint16_t num);

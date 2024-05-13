@@ -135,8 +135,11 @@ private:
 	// file_append(path, content)
 	static int l_file_append(lua_State *L);
 
-	// get_node_name(pos)
-	static int l_get_node_name(lua_State *L);
+	// get_object_or_nil(objId)
+	static int l_get_object_or_nil(lua_State *L);
+
+	// get_server_url()
+	static int l_get_server_url(lua_State *L);
 
 public:
 	static void Initialize(lua_State *L, int top);

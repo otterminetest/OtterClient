@@ -240,6 +240,7 @@ bool Game::startup(bool *kill,
 	this->input               = input;
 	this->chat_backend        = chat_backend;
 	simple_singleplayer_mode  = start_data.isSinglePlayer();
+	m_game_params             = start_data;
 
 	input->keycache.populate();
 

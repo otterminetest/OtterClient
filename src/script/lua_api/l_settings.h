@@ -35,6 +35,9 @@ private:
 	// get(self, key) -> value
 	static int l_get(lua_State *L);
 
+	// get_json(self, key) -> table
+	static int l_get_json(lua_State *L);
+
 	// get_bool(self, key) -> boolean
 	static int l_get_bool(lua_State *L);
 
@@ -46,6 +49,9 @@ private:
 
 	// set(self, key, value)
 	static int l_set(lua_State *L);
+
+	// set_json(self, key, value)
+	static int l_set_json(lua_State *L);
 
 	// set_bool(self, key, value)
 	static int l_set_bool(lua_State *L);

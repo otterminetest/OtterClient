@@ -236,6 +236,8 @@ public:
 
 	bool isWaitingForReattach() const;
 
+	bool isPlayerFriendly(GenericCAO *playerObj);
+
 	inline PlayerSettings &getPlayerSettings() { return m_player_settings; }
 
 private:

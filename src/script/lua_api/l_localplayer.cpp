@@ -17,6 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include <iostream>
+
 #include "l_localplayer.h"
 #include "l_internal.h"
 #include "lua_api/l_item.h"
@@ -568,12 +570,22 @@ int LuaLocalPlayer::l_set_pos(lua_State *L)
 int LuaLocalPlayer::l_get_pointed_thing(lua_State *L)
 {
 	PointedThing pointed = g_game->runData.pointed_old;
-	if (pointed.type == POINTEDTHING_NODE) {
-		push_pointed_thing(L, pointed);
-		return 1;
+	push_pointed_thing(L, pointed, true, true);
+	return 1;
+}
+
+// get_object_or_nil()
+int LuaLocalPlayer::l_get_object_or_nil(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	GenericCAO *playercao = player->getCAO();
+	if (playercao) {
+		push_generic_cao(L, playercao);
+	} else {
+		lua_pushnil(L);
 	}
-	lua_pushnil(L);
-	return 0;
+	return 1;
 }
 
 const char LuaLocalPlayer::className[] = "LocalPlayer";
@@ -592,7 +604,7 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, is_climbing),
 		luamethod(LuaLocalPlayer, swimming_vertical),
 		luamethod(LuaLocalPlayer, get_physics_override),
-		// TODO: figure our if these are useful in any way
+		// TODO: figure out if these are useful in any way
 		luamethod(LuaLocalPlayer, get_last_pos),
 		luamethod(LuaLocalPlayer, get_last_velocity),
 		luamethod(LuaLocalPlayer, get_last_look_horizontal),
@@ -619,6 +631,7 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, set_wield_index),
 		luamethod(LuaLocalPlayer, set_pos),
 		luamethod(LuaLocalPlayer, get_pointed_thing),
+		luamethod(LuaLocalPlayer, get_object_or_nil),
 
 		{0, 0}
 };

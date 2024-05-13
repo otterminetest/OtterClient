@@ -695,29 +695,36 @@ int ModApiClient::l_file_append(lua_State *L)
 	return 1;
 }
 
-// get_node_name(pos)
-int ModApiClient::l_get_node_name(lua_State *L)
+// get_object_or_nil(id)
+// pos = u16
+int ModApiClient::l_get_object_or_nil(lua_State *L)
 {
-	v3s16 pos = read_v3s16(L, 1);
+	// id
+	u16 object_id = lua_tointeger(L, 1);
 
-	Client *client = getClient(L);
-	const NodeDefManager *nodedef = client->getNodeDefManager();
-
-	bool pos_ok;
-	MapNode n = getClient(L)->CSMGetNode(pos, &pos_ok);
-	if (pos_ok) {
-		if (n.getContent() == CONTENT_IGNORE) {
-			lua_pushstring(L, "ignore");
-		} else if (nodedef->get(n).name == "unknown") {
-			lua_pushstring(L, "unknown");
-		} else {
-			lua_pushstring(L, nodedef->get(n).name.c_str());
-		}
+	// Do it
+	ClientEnvironment &env = getClient(L)->getEnv();
+	GenericCAO *gcao = env.getGenericCAO(object_id);
+	if (gcao) {
+		push_generic_cao(L, gcao);
 	} else {
 		lua_pushnil(L);
 	}
-    
-    return 1; 
+	return 1;
+}
+
+// get_server_url
+int ModApiClient::l_get_server_url(lua_State *L)
+{
+	if (!g_game->simple_singleplayer_mode) {
+		std::string address = g_game->m_game_params.address;
+		u16 port = g_game->m_game_params.socket_port;
+		std::string server_url = address + ":" + toPaddedString(port);
+		lua_pushstring(L, server_url.c_str());
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
 }
 
 void ModApiClient::Initialize(lua_State *L, int top)
@@ -758,5 +765,6 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(nodes_at_block_pos);
 	API_FCT(file_write);
 	API_FCT(file_append);
-	API_FCT(get_node_name);
+	API_FCT(get_object_or_nil);
+	API_FCT(get_server_url);
 }

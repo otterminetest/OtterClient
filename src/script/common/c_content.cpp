@@ -16,6 +16,9 @@ You should have received a copy of the GNU Lesser General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
+
+#include <iostream>
+
 #include "common/c_content.h"
 #include "common/c_converter.h"
 #include "common/c_types.h"
@@ -563,6 +566,43 @@ void push_object_properties(lua_State *L, const ObjectProperties *prop)
 	lua_setfield(L, -2, "damage_texture_modifier");
 	lua_pushboolean(L, prop->show_on_minimap);
 	lua_setfield(L, -2, "show_on_minimap");
+
+	// Remember to update object_property_keys above
+	// when adding a new property
+}
+
+/******************************************************************************/
+
+void push_generic_cao(lua_State *L, const GenericCAO *gcao)
+{
+	lua_newtable(L);
+
+	lua_pushnumber(L, gcao->getId());
+	lua_setfield(L, -2, "id");
+	lua_pushboolean(L, gcao->isPlayer());
+	lua_setfield(L, -2, "is_player");
+	lua_pushboolean(L, gcao->isLocalPlayer());
+	lua_setfield(L, -2, "is_local_player");
+	lua_pushboolean(L, gcao->isVisible());
+	lua_setfield(L, -2, "is_visible");
+	lua_pushstring(L, gcao->getName().c_str());
+	lua_setfield(L, -2, "name");
+	push_v3f(L, gcao->getPosition());
+	lua_setfield(L, -2, "position");
+	push_v3f(L, gcao->getVelocity());
+	lua_setfield(L, -2, "velocity");
+	push_v3f(L, gcao->getAcceleration());
+	lua_setfield(L, -2, "acceleration");
+	push_v3f(L, gcao->getRotation());
+	lua_setfield(L, -2, "rotation");
+	lua_pushnumber(L, gcao->getHp());
+	lua_setfield(L, -2, "hp");
+	lua_pushboolean(L, gcao->isImmortal());
+	lua_setfield(L, -2, "is_immortal");
+	lua_pushboolean(L, gcao->collideWithObjects());
+	lua_setfield(L, -2, "collide_with_objects");
+	push_object_properties(L, &gcao->getProperties());
+	lua_setfield(L, -2, "props");
 
 	// Remember to update object_property_keys above
 	// when adding a new property

@@ -194,3 +194,5 @@ end
 
 core.register_list_command("xray", "Configure X-Ray", "xray_nodes")
 core.register_list_command("search", "Configure NodeESP", "node_esp_nodes")
+core.register_player_list_command("friend", "Configure Friends.", "friends")
+core.register_server_list_command("ctf", "Configure CTF servers.", "ctf_servers")

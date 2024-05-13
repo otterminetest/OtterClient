@@ -977,3 +977,26 @@ v3f str_to_v3f(std::string_view str)
 	value.Z = stof(f.next(")"));
 	return value;
 }
+
+Json::Value str_to_json(std::string_view str) {
+	Json::CharReaderBuilder builder;
+	Json::CharReader* reader = builder.newCharReader();
+	Json::Value root;
+	std::string errors;
+	bool parsedSuccess = reader->parse(str.data(),
+									   str.data() + str.size(), 
+									   &root, 
+									   &errors);
+	delete reader;
+	if (not parsedSuccess) {
+		throw std::runtime_error("Failed to parse JSON: " + errors);
+	}
+	return root;
+}
+
+std::string toPaddedString(uint16_t num)
+{
+    std::stringstream ss;
+    ss << std::setw(4) << std::setfill('0') << num;
+    return ss.str();
+}

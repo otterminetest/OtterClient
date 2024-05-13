@@ -146,7 +146,7 @@ void Client::handleCommand_AuthAccept(NetworkPacket* pkt)
 	// Set player position
 	LocalPlayer *player = m_env.getLocalPlayer();
 	assert(player != NULL);
-	player->setPosition(playerpos);
+	player->setLegitPosition(playerpos);
 
 	infostream << "Client: received map seed: " << m_map_seed << std::endl;
 	infostream << "Client: received recommended send interval "
@@ -470,7 +470,6 @@ void Client::handleCommand_ActiveObjectRemoveAdd(NetworkPacket* pkt)
 	*/
 
 	LocalPlayer *player = m_env.getLocalPlayer();
-	bool try_reattach = player && player->isWaitingForReattach();
 
 	try {
 		u8 type;
@@ -490,8 +489,6 @@ void Client::handleCommand_ActiveObjectRemoveAdd(NetworkPacket* pkt)
 		for (u16 i = 0; i < added_count; i++) {
 			*pkt >> id >> type;
 			m_env.addActiveObject(id, type, pkt->readLongString());
-			if (try_reattach)
-				player->tryReattach(id);
 		}
 	} catch (PacketError &e) {
 		infostream << "handleCommand_ActiveObjectRemoveAdd: " << e.what()
@@ -623,15 +620,20 @@ void Client::handleCommand_MovePlayer(NetworkPacket* pkt)
 	LocalPlayer *player = m_env.getLocalPlayer();
 	assert(player != NULL);
 
-	if ((player->getCAO() && player->getCAO()->getParentId()) || player->isWaitingForReattach())
-		return;
-
 	v3f pos;
 	f32 pitch, yaw;
 
 	*pkt >> pos >> pitch >> yaw;
 
 	player->setLegitPosition(pos);
+
+	/*
+	std::cout << "Client got TOCLIENT_MOVE_PLAYER"
+			<< " pos=(" << pos.X << "," << pos.Y << "," << pos.Z << ")"
+			<< " pitch=" << pitch
+			<< " yaw=" << yaw
+			<< std::endl;
+	*/
 
 	infostream << "Client got TOCLIENT_MOVE_PLAYER"
 			<< " pos=(" << pos.X << "," << pos.Y << "," << pos.Z << ")"

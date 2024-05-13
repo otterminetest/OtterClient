@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <set>
 #include <map>
 #include <mutex>
+#include <json/json.h>
 
 class Settings;
 struct NoiseParams;
@@ -166,6 +167,7 @@ public:
 	float getFloat(const std::string &name, float min, float max) const;
 	v2f getV2F(const std::string &name) const;
 	v3f getV3F(const std::string &name) const;
+	Json::Value getJson(const std::string &name) const;
 	u32 getFlagStr(const std::string &name, const FlagDesc *flagdesc,
 			u32 *flagmask) const;
 	bool getNoiseParams(const std::string &name, NoiseParams &np) const;
@@ -178,7 +180,6 @@ public:
 	bool exists(const std::string &name) const;
 	// check if setting exists in this object ("locally")
 	bool existsLocal(const std::string &name) const;
-
 
 	/***************************************
 	 * Getters that don't throw exceptions *
@@ -195,6 +196,8 @@ public:
 	bool getFloatNoEx(const std::string &name, float &val) const;
 	bool getV2FNoEx(const std::string &name, v2f &val) const;
 	bool getV3FNoEx(const std::string &name, v3f &val) const;
+
+	bool getJsonNoEx(const std::string& jsonString, Json::Value& outputJson) const;
 
 	// Like other getters, but handling each flag individualy:
 	// 1) Read default flags (or 0)
@@ -224,6 +227,7 @@ public:
 	bool setV3F(const std::string &name, v3f value);
 	bool setFlagStr(const std::string &name, u32 flags,
 		const FlagDesc *flagdesc = nullptr, u32 flagmask = U32_MAX);
+	bool setJson(const std::string &name, const Json::Value& jsonData);
 	bool setNoiseParams(const std::string &name, const NoiseParams &np);
 
 	// remove a setting

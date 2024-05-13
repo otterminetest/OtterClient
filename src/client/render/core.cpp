@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 #include "client/camera.h"
 #include "client/client.h"
+#include "client/game.h"
 #include "client/content_cao.h"
 #include "client/clientmap.h"
 #include "client/hud.h"
@@ -97,11 +98,12 @@ void RenderingCore::drawTracersAndESP()
 	draw_node_esp = g_settings->getBool("enable_node_esp");
 	draw_node_tracers = g_settings->getBool("enable_node_tracers");
 	entity_esp_color = video::SColor(255, 255, 255, 255);
-	player_esp_color = video::SColor(255, 0, 255, 0);
-	self_esp_color = video::SColor(255, 255, 255, 0);
+	friend_esp_color = video::SColor(255, 0, 255, 0);
+	enemy_esp_color = video::SColor(255, 255, 0, 0);
 
 	ClientEnvironment &env = client->getEnv();
 	Camera *camera = client->getCamera();
+	LocalPlayer *player = env.getLocalPlayer();
 
 	v3f camera_offset = intToFloat(camera->getOffset(), BS);
 
@@ -131,14 +133,14 @@ void RenderingCore::drawTracersAndESP()
 			}
 			//v3f velocity = obj->getVelocity();
 			//v3f rotation = obj->getRotation();
-			bool is_self = obj->isLocalPlayer();
+			bool is_friendly = player->isPlayerFriendly(obj);
 			bool is_player = obj->isPlayer();
 			bool draw_esp = is_player ? draw_player_esp : draw_entity_esp;
 			bool draw_tracers = is_player ? draw_player_tracers : draw_entity_tracers;
 			video::SColor color = is_player 
-				? (is_self  
-					? self_esp_color
-			 		: player_esp_color)
+				? (is_friendly  
+					? friend_esp_color
+			 		: enemy_esp_color)
 				: entity_esp_color;
 			if (! (draw_esp || draw_tracers))
 				continue;

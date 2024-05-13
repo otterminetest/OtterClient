@@ -184,6 +184,8 @@ void set_default_settings()
 	settings->setDefault("prevent_natural_damage", "true");
 	settings->setDefault("coords", "true");
 	settings->setDefault("fullbright", "true");
+	settings->setDefault("friends", "{}");
+	settings->setDefault("ctf_servers", "");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");

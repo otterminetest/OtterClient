@@ -929,6 +929,7 @@ public:
 
 	GameRunData runData;
 	Flags m_flags;
+	GameStartData m_game_params;
 
 	/* 'cache'
 	   This class does take ownership/responsibily for cleaning up etc of any of

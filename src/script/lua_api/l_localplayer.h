@@ -122,6 +122,9 @@ private:
 	// get_pointed_thing()
 	static int l_get_pointed_thing(lua_State *L);
 
+	// get_object_or_nil()
+	static int l_get_object_or_nil(lua_State *L);
+
 	static LocalPlayer *getobject(LuaLocalPlayer *ref);
 	static LocalPlayer *getobject(lua_State *L, int narg);
 
