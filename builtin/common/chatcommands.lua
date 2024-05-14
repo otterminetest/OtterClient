@@ -74,7 +74,7 @@ local function get_pt_name(object_type)
 	if not player then return end
 	local pt = player:get_pointed_thing()
 	if not pt then return end
-	
+
 	local item
 	if object_type == "node" then
 		item = core.get_node_or_nil(pt.under)

@@ -45,7 +45,6 @@ extern "C" {
 // prior to the src/hud.h, which is not good on server only build
 #include "../../hud.h"
 #include "content/mods.h"
-#include "client/content_cao.h"
 
 namespace Json { class Value; }
 
@@ -74,7 +73,6 @@ struct collisionMoveResult;
 namespace treegen { struct TreeDef; }
 
 extern struct EnumString es_TileAnimationType[];
-
 
 extern const std::array<const char *, 33> object_property_keys;
 
@@ -133,9 +131,6 @@ void               read_object_properties    (lua_State *L, int index,
 
 void               push_object_properties    (lua_State *L,
                                               const ObjectProperties *prop);
-
-void               push_generic_cao          (lua_State *L, 
-                                              const GenericCAO *gcao);
 
 void               push_inventory_list       (lua_State *L,
                                               const InventoryList &invlist);

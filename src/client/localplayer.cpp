@@ -109,6 +109,7 @@ static aabb3f getNodeBoundingBox(const std::vector<aabb3f> &nodeboxes)
 	return b_max;
 }
 
+
 bool LocalPlayer::updateSneakNode(Map *map, const v3f &position,
 	const v3f &sneak_max)
 {
@@ -842,7 +843,7 @@ void LocalPlayer::tryReattach(int id)
 
 bool LocalPlayer::isWaitingForReattach() const
 {
-	return m_cao && !m_cao->getParent() && m_cao->m_waiting_for_reattach > 0;
+	return m_cao && ! m_cao->getParent() && m_cao->m_waiting_for_reattach > 0;
 }
 
 std::string getShirtColor(GenericCAO *playerObj) {
@@ -877,11 +878,12 @@ bool LocalPlayer::isPlayerFriendly(GenericCAO *playerObj) {
 		return false;
 	}
 
-	if (!g_game->simple_singleplayer_mode) {
-		std::string address = g_game->m_game_params.address;
-		u16 port = g_game->m_game_params.socket_port;
+	if (!m_client->m_simple_singleplayer_mode) {
+		Address serverAddress = m_client->getServerAddress();
+		std::string address = m_client->getAddressName().c_str();
+		u16 port = serverAddress.getPort();
 		std::string server_url = address + ":" + toPaddedString(port);
-		
+
 		std::vector<std::string> ctf_vec = str_split(g_settings->get("ctf_servers"), ',');
 		std::vector<std::string>::iterator it;
 

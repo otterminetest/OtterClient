@@ -17,8 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include <iostream>
-
 #include "l_localplayer.h"
 #include "l_internal.h"
 #include "lua_api/l_item.h"
@@ -579,13 +577,40 @@ int LuaLocalPlayer::l_get_object_or_nil(lua_State *L)
 {
 	LocalPlayer *player = getobject(L, 1);
 
-	GenericCAO *playercao = player->getCAO();
-	if (playercao) {
-		push_generic_cao(L, playercao);
-	} else {
-		lua_pushnil(L);
+	GenericCAO *gcao = player->getCAO();
+	if (gcao) {
+		//push_generic_cao
+		lua_newtable(L);
+		lua_pushnumber(L, gcao->getId());
+		lua_setfield(L, -2, "id");
+		lua_pushboolean(L, gcao->isPlayer());
+		lua_setfield(L, -2, "is_player");
+		lua_pushboolean(L, gcao->isLocalPlayer());
+		lua_setfield(L, -2, "is_local_player");
+		lua_pushboolean(L, gcao->isVisible());
+		lua_setfield(L, -2, "is_visible");
+		lua_pushstring(L, gcao->getName().c_str());
+		lua_setfield(L, -2, "name");
+		push_v3f(L, gcao->getPosition());
+		lua_setfield(L, -2, "position");
+		push_v3f(L, gcao->getVelocity());
+		lua_setfield(L, -2, "velocity");
+		push_v3f(L, gcao->getAcceleration());
+		lua_setfield(L, -2, "acceleration");
+		push_v3f(L, gcao->getRotation());
+		lua_setfield(L, -2, "rotation");
+		lua_pushnumber(L, gcao->getHp());
+		lua_setfield(L, -2, "hp");
+		lua_pushboolean(L, gcao->isImmortal());
+		lua_setfield(L, -2, "is_immortal");
+		lua_pushboolean(L, gcao->collideWithObjects());
+		lua_setfield(L, -2, "collide_with_objects");
+		push_object_properties(L, &gcao->getProperties());
+		lua_setfield(L, -2, "props");
+		return 1;
 	}
-	return 1;
+	lua_pushnil(L);
+	return 0;
 }
 
 const char LuaLocalPlayer::className[] = "LocalPlayer";
@@ -604,7 +629,7 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, is_climbing),
 		luamethod(LuaLocalPlayer, swimming_vertical),
 		luamethod(LuaLocalPlayer, get_physics_override),
-		// TODO: figure out if these are useful in any way
+		// TODO: figure our if these are useful in any way
 		luamethod(LuaLocalPlayer, get_last_pos),
 		luamethod(LuaLocalPlayer, get_last_velocity),
 		luamethod(LuaLocalPlayer, get_last_look_horizontal),

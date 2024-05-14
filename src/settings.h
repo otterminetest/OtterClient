@@ -181,6 +181,7 @@ public:
 	// check if setting exists in this object ("locally")
 	bool existsLocal(const std::string &name) const;
 
+
 	/***************************************
 	 * Getters that don't throw exceptions *
 	 ***************************************/
@@ -196,7 +197,6 @@ public:
 	bool getFloatNoEx(const std::string &name, float &val) const;
 	bool getV2FNoEx(const std::string &name, v2f &val) const;
 	bool getV3FNoEx(const std::string &name, v3f &val) const;
-
 	bool getJsonNoEx(const std::string& jsonString, Json::Value& outputJson) const;
 
 	// Like other getters, but handling each flag individualy:

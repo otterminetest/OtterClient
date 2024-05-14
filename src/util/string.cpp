@@ -988,7 +988,7 @@ Json::Value str_to_json(std::string_view str) {
 									   &root, 
 									   &errors);
 	delete reader;
-	if (not parsedSuccess) {
+	if (!parsedSuccess) {
 		throw std::runtime_error("Failed to parse JSON: " + errors);
 	}
 	return root;

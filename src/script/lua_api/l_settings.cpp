@@ -26,8 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "noise.h"
 #include "log.h"
 
-#include <json/json.h>
-
 
 /* This protects the following from being set:
  * 'secure.*' settings

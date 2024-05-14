@@ -25,7 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 #include "client/camera.h"
 #include "client/client.h"
-#include "client/game.h"
 #include "client/content_cao.h"
 #include "client/clientmap.h"
 #include "client/hud.h"

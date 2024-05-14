@@ -469,8 +469,6 @@ void Client::handleCommand_ActiveObjectRemoveAdd(NetworkPacket* pkt)
 		}
 	*/
 
-	LocalPlayer *player = m_env.getLocalPlayer();
-
 	try {
 		u8 type;
 		u16 removed_count, added_count, id;
@@ -626,14 +624,6 @@ void Client::handleCommand_MovePlayer(NetworkPacket* pkt)
 	*pkt >> pos >> pitch >> yaw;
 
 	player->setLegitPosition(pos);
-
-	/*
-	std::cout << "Client got TOCLIENT_MOVE_PLAYER"
-			<< " pos=(" << pos.X << "," << pos.Y << "," << pos.Z << ")"
-			<< " pitch=" << pitch
-			<< " yaw=" << yaw
-			<< std::endl;
-	*/
 
 	infostream << "Client got TOCLIENT_MOVE_PLAYER"
 			<< " pos=(" << pos.X << "," << pos.Y << "," << pos.Z << ")"

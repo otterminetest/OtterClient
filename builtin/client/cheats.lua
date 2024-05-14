@@ -2,7 +2,6 @@ core.cheats = {
 	["Combat"] = {
 		["AntiKnockback"] = "antiknockback",
 		["AttachmentFloat"] = "float_above_parent",
-		--["KillAura"] = "killaura",
 	},
 	["Movement"] = {
 		["Freecam"] = "freecam",

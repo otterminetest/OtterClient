@@ -695,8 +695,43 @@ int ModApiClient::l_file_append(lua_State *L)
 	return 1;
 }
 
+void push_generic_cao(lua_State *L, const GenericCAO *gcao)
+{
+	lua_newtable(L);
+
+	lua_pushnumber(L, gcao->getId());
+	lua_setfield(L, -2, "id");
+	lua_pushboolean(L, gcao->isPlayer());
+	lua_setfield(L, -2, "is_player");
+	lua_pushboolean(L, gcao->isLocalPlayer());
+	lua_setfield(L, -2, "is_local_player");
+	lua_pushboolean(L, gcao->isVisible());
+	lua_setfield(L, -2, "is_visible");
+	lua_pushstring(L, gcao->getName().c_str());
+	lua_setfield(L, -2, "name");
+	push_v3f(L, gcao->getPosition());
+	lua_setfield(L, -2, "position");
+	push_v3f(L, gcao->getVelocity());
+	lua_setfield(L, -2, "velocity");
+	push_v3f(L, gcao->getAcceleration());
+	lua_setfield(L, -2, "acceleration");
+	push_v3f(L, gcao->getRotation());
+	lua_setfield(L, -2, "rotation");
+	lua_pushnumber(L, gcao->getHp());
+	lua_setfield(L, -2, "hp");
+	lua_pushboolean(L, gcao->isImmortal());
+	lua_setfield(L, -2, "is_immortal");
+	lua_pushboolean(L, gcao->collideWithObjects());
+	lua_setfield(L, -2, "collide_with_objects");
+	push_object_properties(L, &gcao->getProperties());
+	lua_setfield(L, -2, "props");
+
+	// Remember to update object_property_keys above
+	// when adding a new property
+}
+
 // get_object_or_nil(id)
-// pos = u16
+// objId = u16
 int ModApiClient::l_get_object_or_nil(lua_State *L)
 {
 	// id
@@ -706,25 +741,54 @@ int ModApiClient::l_get_object_or_nil(lua_State *L)
 	ClientEnvironment &env = getClient(L)->getEnv();
 	GenericCAO *gcao = env.getGenericCAO(object_id);
 	if (gcao) {
-		push_generic_cao(L, gcao);
-	} else {
-		lua_pushnil(L);
+		//push_generic_cao
+		lua_newtable(L);
+		lua_pushnumber(L, gcao->getId());
+		lua_setfield(L, -2, "id");
+		lua_pushboolean(L, gcao->isPlayer());
+		lua_setfield(L, -2, "is_player");
+		lua_pushboolean(L, gcao->isLocalPlayer());
+		lua_setfield(L, -2, "is_local_player");
+		lua_pushboolean(L, gcao->isVisible());
+		lua_setfield(L, -2, "is_visible");
+		lua_pushstring(L, gcao->getName().c_str());
+		lua_setfield(L, -2, "name");
+		push_v3f(L, gcao->getPosition());
+		lua_setfield(L, -2, "position");
+		push_v3f(L, gcao->getVelocity());
+		lua_setfield(L, -2, "velocity");
+		push_v3f(L, gcao->getAcceleration());
+		lua_setfield(L, -2, "acceleration");
+		push_v3f(L, gcao->getRotation());
+		lua_setfield(L, -2, "rotation");
+		lua_pushnumber(L, gcao->getHp());
+		lua_setfield(L, -2, "hp");
+		lua_pushboolean(L, gcao->isImmortal());
+		lua_setfield(L, -2, "is_immortal");
+		lua_pushboolean(L, gcao->collideWithObjects());
+		lua_setfield(L, -2, "collide_with_objects");
+		push_object_properties(L, &gcao->getProperties());
+		lua_setfield(L, -2, "props");
+		return 1;
 	}
-	return 1;
+	lua_pushnil(L);
+	return 0;
 }
 
 // get_server_url
 int ModApiClient::l_get_server_url(lua_State *L)
 {
-	if (!g_game->simple_singleplayer_mode) {
-		std::string address = g_game->m_game_params.address;
-		u16 port = g_game->m_game_params.socket_port;
+	Client *client = getClient(L);
+	if (!client->m_simple_singleplayer_mode) {
+		Address serverAddress = client->getServerAddress();
+		std::string address = client->getAddressName().c_str();
+		u16 port = serverAddress.getPort();
 		std::string server_url = address + ":" + toPaddedString(port);
 		lua_pushstring(L, server_url.c_str());
-	} else {
-		lua_pushnil(L);
+		return 1;
 	}
-	return 1;
+	lua_pushnil(L);
+	return 0;
 }
 
 void ModApiClient::Initialize(lua_State *L, int top)
