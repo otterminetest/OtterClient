@@ -883,27 +883,32 @@ void GenericCAO::updateLight(u32 day_night_ratio)
 	*/
 
 	u16 light_at_pos = 0;
-	u8 light_at_pos_intensity = 0;
-	bool pos_ok = false;
 
-	v3s16 pos[3];
-	u16 npos = getLightPosition(pos);
-	for (u16 i = 0; i < npos; i++) {
-		bool this_ok;
-		MapNode n = m_env->getMap().getNode(pos[i], &this_ok);
-		if (this_ok) {
-			// Get light level at the position plus the entity glow
-			u16 this_light = getInteriorLight(n, m_prop.glow, m_client->ndef());
-			u8 this_light_intensity = MYMAX(this_light & 0xFF, this_light >> 8);
-			if (this_light_intensity > light_at_pos_intensity) {
-				light_at_pos = this_light;
-				light_at_pos_intensity = this_light_intensity;
-			}
-			pos_ok = true;
-		}
-	}
-	if (!pos_ok)
+	if (g_settings->getBool("fullbright")) {
 		light_at_pos = LIGHT_SUN;
+	} else {
+		u8 light_at_pos_intensity = 0;
+		bool pos_ok = false;
+
+		v3s16 pos[3];
+		u16 npos = getLightPosition(pos);
+		for (u16 i = 0; i < npos; i++) {
+			bool this_ok;
+			MapNode n = m_env->getMap().getNode(pos[i], &this_ok);
+			if (this_ok) {
+				// Get light level at the position plus the entity glow
+				u16 this_light = getInteriorLight(n, m_prop.glow, m_client->ndef());
+				u8 this_light_intensity = MYMAX(this_light & 0xFF, this_light >> 8);
+				if (this_light_intensity > light_at_pos_intensity) {
+					light_at_pos = this_light;
+					light_at_pos_intensity = this_light_intensity;
+				}
+				pos_ok = true;
+			}
+		}
+		if (!pos_ok)
+			light_at_pos = LIGHT_SUN;
+	}
 
 	// Initialize with full alpha, otherwise entity won't be visible
 	video::SColor light(0xFFFFFFFF);
@@ -914,9 +919,6 @@ void GenericCAO::updateLight(u32 day_night_ratio)
 		light = encode_light(light_at_pos, m_prop.glow);
 	else
 		final_color_blend(&light, light_at_pos, day_night_ratio);
-
-	if (g_settings->getBool("fullbright"))
-		light = video::SColor(0xFFFFFFFF);
 
 	if (light != m_last_light) {
 		m_last_light = light;
