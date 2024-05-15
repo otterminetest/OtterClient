@@ -141,6 +141,9 @@ private:
 	// get_server_url()
 	static int l_get_server_url(lua_State *L);
 
+	// can_attack()
+	static int l_can_attack(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 };

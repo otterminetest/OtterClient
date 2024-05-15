@@ -231,6 +231,8 @@ public:
 		m_is_visible = toset;
 	}
 
+	bool hasMovedRecently();
+
 	void setChildrenVisible(bool toset);
 	void setAttachment(int parent_id, const std::string &bone, v3f position,
 			v3f rotation, bool force_visible) override;
@@ -288,6 +290,8 @@ public:
 
 	bool directReportPunch(v3f dir, const ItemStack *punchitem=NULL,
 			float time_from_last_punch=1000000) override;
+
+	bool canAttack(int threshold = 100);
 
 	std::string debugInfoText() override;
 

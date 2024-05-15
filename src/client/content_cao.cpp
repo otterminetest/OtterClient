@@ -48,6 +48,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/shader.h"
 #include "client/minimap.h"
 #include <quaternion.h>
+#include "script/scripting_client.h"
 
 class Settings;
 struct ToolCapabilities;
@@ -1274,6 +1275,9 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 		m_animated_meshnode->animateJoints();
 		updateBones(dtime);
 	}
+
+	if (m_client->modsLoaded())
+		m_client->getScript()->on_active_object_step(dtime, this);
 }
 
 void GenericCAO::updateTexturePos()
@@ -1782,6 +1786,10 @@ void GenericCAO::processMessage(const std::string &data)
 		}
 		rot_translator.update(m_rotation, false, update_interval);
 		updateNodePos();
+
+		if (m_client->modsLoaded())
+			m_client->getScript()->on_active_object_update_position(this);
+
 	} else if (cmd == AO_CMD_SET_TEXTURE_MOD) {
 		std::string mod = deSerializeString16(is);
 
@@ -2039,10 +2047,22 @@ bool GenericCAO::directReportPunch(v3f dir, const ItemStack *punchitem,
 	return false;
 }
 
+bool GenericCAO::canAttack(int threshold) {
+	for(ItemGroupList::const_iterator i = m_armor_groups.begin();
+			i != m_armor_groups.end(); ++i) {
+		if (m_prop.pointable == PointabilityType::POINTABLE
+			&& i->first == "fleshy" 
+			&& i->second >= threshold) {
+				return true;
+		}
+	}
+	return false;
+}
+
 std::string GenericCAO::debugInfoText()
 {
 	std::ostringstream os(std::ios::binary);
-	os<<"GenericCAO hp="<<m_hp<<"\n";
+	os<<"GenericCAO id="<<m_id<<" hp="<<m_hp<<"\n";
 	os<<"armor={";
 	for(ItemGroupList::const_iterator i = m_armor_groups.begin();
 			i != m_armor_groups.end(); ++i)

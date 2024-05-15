@@ -85,6 +85,7 @@ public:
 		QUICKTUNE_DEC,
 
 		// cheats
+		KILLAURA,
 		FREECAM,
 
 		// hotbar

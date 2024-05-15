@@ -28,6 +28,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/client.h"
 #include "client/game.h"
 
+#include <iostream>
+
 LuaLocalPlayer::LuaLocalPlayer(LocalPlayer *m) : m_localplayer(m)
 {
 }
@@ -111,6 +113,20 @@ int LuaLocalPlayer::l_get_wielded_item(lua_State *L)
 	ItemStack selected_item;
 	player->getWieldedItem(&selected_item, nullptr);
 	LuaItemStack::create(L, selected_item);
+	return 1;
+}
+
+// get item range of currently wielded item
+// get_wielded_item_range(self)
+int LuaLocalPlayer::l_get_wielded_item_range(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	ItemStack selected_item, hand_item;
+	player->getWieldedItem(&selected_item, &hand_item);
+	f32 d = getToolRange(selected_item, hand_item, g_game->itemdef_manager);
+	lua_pushnumber(L, d);
+
 	return 1;
 }
 
@@ -564,7 +580,7 @@ int LuaLocalPlayer::l_set_pos(lua_State *L)
 	return 0;
 }
 
-// get_pointed_thing()
+// get_pointed_thing(self)
 int LuaLocalPlayer::l_get_pointed_thing(lua_State *L)
 {
 	PointedThing pointed = g_game->runData.pointed_old;
@@ -572,7 +588,7 @@ int LuaLocalPlayer::l_get_pointed_thing(lua_State *L)
 	return 1;
 }
 
-// get_object_or_nil()
+// get_object_or_nil(self)
 int LuaLocalPlayer::l_get_object_or_nil(lua_State *L)
 {
 	LocalPlayer *player = getobject(L, 1);
@@ -591,9 +607,9 @@ int LuaLocalPlayer::l_get_object_or_nil(lua_State *L)
 		lua_setfield(L, -2, "is_visible");
 		lua_pushstring(L, gcao->getName().c_str());
 		lua_setfield(L, -2, "name");
-		push_v3f(L, gcao->getPosition());
+		push_v3f(L, gcao->getPosition() / BS);
 		lua_setfield(L, -2, "position");
-		push_v3f(L, gcao->getVelocity());
+		push_v3f(L, gcao->getVelocity() / BS);
 		lua_setfield(L, -2, "velocity");
 		push_v3f(L, gcao->getAcceleration());
 		lua_setfield(L, -2, "acceleration");
@@ -611,6 +627,46 @@ int LuaLocalPlayer::l_get_object_or_nil(lua_State *L)
 	}
 	lua_pushnil(L);
 	return 0;
+}
+
+// if isn't player, it'll return false
+// is_player_friendly(self, object_id)
+int LuaLocalPlayer::l_is_player_friendly(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+	u16 object_id = lua_tointeger(L, 2);
+
+	ClientEnvironment &env = getClient(L)->getEnv();
+	GenericCAO *gcao = env.getGenericCAO(object_id);
+
+	bool friendly = player->isPlayerFriendly(gcao);
+
+	lua_pushboolean(L, friendly);
+
+	return 1;
+}
+
+// punch(self, object_id)
+int LuaLocalPlayer::l_punch(lua_State *L)
+{
+	u16 object_id = lua_tointeger(L, 2);
+
+	g_game->runData.punching = true;
+	g_game->runData.time_from_last_punch = 0;
+	g_game->runData.object_hit_delay_timer = 0.2;
+
+	PointedThing pointed(object_id, v3f(0, 0, 0), v3f(0, 0, 0), v3f(0, 0, 0), 0, PointabilityType::POINTABLE);
+	getClient(L)->interact(INTERACT_START_DIGGING, pointed);
+
+	return 0;
+}
+
+// get_time_from_last_punch(self)
+int LuaLocalPlayer::l_get_time_from_last_punch(lua_State *L)
+{
+	lua_pushnumber(L, g_game->runData.time_from_last_punch);
+
+	return 1;
 }
 
 const char LuaLocalPlayer::className[] = "LocalPlayer";
@@ -657,6 +713,10 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, set_pos),
 		luamethod(LuaLocalPlayer, get_pointed_thing),
 		luamethod(LuaLocalPlayer, get_object_or_nil),
+		luamethod(LuaLocalPlayer, is_player_friendly),
+		luamethod(LuaLocalPlayer, punch),
+		luamethod(LuaLocalPlayer, get_time_from_last_punch),
+		luamethod(LuaLocalPlayer, get_wielded_item_range),
 
 		{0, 0}
 };

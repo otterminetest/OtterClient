@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "mapnode.h"
 #include "util/string.h"
 #include "util/pointedthing.h"
+#include "client/content_cao.h"
 
 #ifdef _CRT_MSVCP_CURRENT
 #include <cstdint>
@@ -64,6 +65,10 @@ public:
 	bool on_block_data(v3s16 pos);
 	bool on_player_join(std::string name);
 	bool on_player_leave(std::string name);
+	bool on_add_active_object(u16 id, u8 type);
+	bool on_remove_active_object(u16 id);
+	bool on_active_object_update_position(GenericCAO *gcao);
+	bool on_active_object_step(float dtime, GenericCAO *gcao);
 
 	v3f get_send_speed(v3f speed);
 

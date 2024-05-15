@@ -869,6 +869,10 @@ std::string getShirtColor(GenericCAO *playerObj) {
 }
 
 bool LocalPlayer::isPlayerFriendly(GenericCAO *playerObj) {
+	if (!playerObj->isPlayer()) {
+		return false;
+	}
+
 	if (playerObj->isLocalPlayer()) {
 		return true;
 	}

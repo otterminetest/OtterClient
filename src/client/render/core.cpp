@@ -130,6 +130,12 @@ void RenderingCore::drawTracersAndESP()
 			if (!obj) {
 				continue;
 			}
+			if (obj->getProperties().pointable != PointabilityType::POINTABLE) {
+				continue;
+			}
+			if (obj->isPlayer() && obj->getHp() <= 0) {
+				continue;
+			}
 			//v3f velocity = obj->getVelocity();
 			//v3f rotation = obj->getRotation();
 			bool is_friendly = player->isPlayerFriendly(obj);

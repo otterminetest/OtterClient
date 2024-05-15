@@ -125,6 +125,18 @@ private:
 	// get_object_or_nil()
 	static int l_get_object_or_nil(lua_State *L);
 
+	// is_player_friendly(object_id)
+	static int l_is_player_friendly(lua_State *L);
+
+	// punch(object_id)
+	static int l_punch(lua_State *L);
+
+	// get_time_from_last_punch()
+	static int l_get_time_from_last_punch(lua_State *L);
+
+	// get_wielded_item_range()
+	static int l_get_wielded_item_range(lua_State *L);
+
 	static LocalPlayer *getobject(LuaLocalPlayer *ref);
 	static LocalPlayer *getobject(lua_State *L, int narg);
 

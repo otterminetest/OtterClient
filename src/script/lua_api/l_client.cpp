@@ -534,8 +534,6 @@ int ModApiClient::l_get_all_objects(lua_State *L)
 {
 	ClientEnvironment &env = getClient(L)->getEnv();
 
-	v3f pos = checkFloatPos(L, 1);
-
 	std::unordered_map<u16, ClientActiveObject*> objs;
 	env.getAllActiveObjects(objs);
 
@@ -695,41 +693,6 @@ int ModApiClient::l_file_append(lua_State *L)
 	return 1;
 }
 
-void push_generic_cao(lua_State *L, const GenericCAO *gcao)
-{
-	lua_newtable(L);
-
-	lua_pushnumber(L, gcao->getId());
-	lua_setfield(L, -2, "id");
-	lua_pushboolean(L, gcao->isPlayer());
-	lua_setfield(L, -2, "is_player");
-	lua_pushboolean(L, gcao->isLocalPlayer());
-	lua_setfield(L, -2, "is_local_player");
-	lua_pushboolean(L, gcao->isVisible());
-	lua_setfield(L, -2, "is_visible");
-	lua_pushstring(L, gcao->getName().c_str());
-	lua_setfield(L, -2, "name");
-	push_v3f(L, gcao->getPosition());
-	lua_setfield(L, -2, "position");
-	push_v3f(L, gcao->getVelocity());
-	lua_setfield(L, -2, "velocity");
-	push_v3f(L, gcao->getAcceleration());
-	lua_setfield(L, -2, "acceleration");
-	push_v3f(L, gcao->getRotation());
-	lua_setfield(L, -2, "rotation");
-	lua_pushnumber(L, gcao->getHp());
-	lua_setfield(L, -2, "hp");
-	lua_pushboolean(L, gcao->isImmortal());
-	lua_setfield(L, -2, "is_immortal");
-	lua_pushboolean(L, gcao->collideWithObjects());
-	lua_setfield(L, -2, "collide_with_objects");
-	push_object_properties(L, &gcao->getProperties());
-	lua_setfield(L, -2, "props");
-
-	// Remember to update object_property_keys above
-	// when adding a new property
-}
-
 // get_object_or_nil(id)
 // objId = u16
 int ModApiClient::l_get_object_or_nil(lua_State *L)
@@ -753,9 +716,9 @@ int ModApiClient::l_get_object_or_nil(lua_State *L)
 		lua_setfield(L, -2, "is_visible");
 		lua_pushstring(L, gcao->getName().c_str());
 		lua_setfield(L, -2, "name");
-		push_v3f(L, gcao->getPosition());
+		push_v3f(L, gcao->getPosition() / BS);
 		lua_setfield(L, -2, "position");
-		push_v3f(L, gcao->getVelocity());
+		push_v3f(L, gcao->getVelocity() / BS);
 		lua_setfield(L, -2, "velocity");
 		push_v3f(L, gcao->getAcceleration());
 		lua_setfield(L, -2, "acceleration");
@@ -789,6 +752,26 @@ int ModApiClient::l_get_server_url(lua_State *L)
 	}
 	lua_pushnil(L);
 	return 0;
+}
+
+// can_attack(object_id)
+int ModApiClient::l_can_attack(lua_State *L)
+{
+	u16 object_id = lua_tointeger(L, 1);
+
+	ClientEnvironment &env = getClient(L)->getEnv();
+	GenericCAO *gcao = env.getGenericCAO(object_id);
+
+	if (!gcao) {
+		lua_pushnil(L);
+		return 0;
+	}
+
+	bool can_attack = gcao->canAttack(1);
+
+	lua_pushboolean(L, can_attack);
+
+	return 1;
 }
 
 void ModApiClient::Initialize(lua_State *L, int top)
@@ -831,4 +814,5 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(file_append);
 	API_FCT(get_object_or_nil);
 	API_FCT(get_server_url);
+	API_FCT(can_attack);
 }

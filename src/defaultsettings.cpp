@@ -186,6 +186,10 @@ void set_default_settings()
 	settings->setDefault("fullbright", "true");
 	settings->setDefault("friends", "{}");
 	settings->setDefault("ctf_servers", "");
+	settings->setDefault("killaura.players", "true");
+	settings->setDefault("killaura.mobs", "false");
+	settings->setDefault("punch_interval", "auto");
+	settings->setDefault("spamclick_multiplier", "6");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");
@@ -207,7 +211,9 @@ void set_default_settings()
 	settings->setDefault("keymap_cmd_local", ".");
 	settings->setDefault("keymap_minimap", "KEY_KEY_V");
 	settings->setDefault("keymap_console", "KEY_F10");
+	
 	settings->setDefault("keymap_toggle_freecam", "KEY_KEY_G");
+	settings->setDefault("keymap_toggle_killaura", "KEY_KEY_X");
 
 	settings->setDefault("keymap_select_up", "KEY_UP");
 	settings->setDefault("keymap_select_down", "KEY_DOWN");

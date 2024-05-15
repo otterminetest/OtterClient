@@ -86,3 +86,7 @@ core.registered_on_inventory_open, core.register_on_inventory_open = make_regist
 core.registered_on_block_data, core.register_on_block_data = make_registration()
 core.registered_on_player_join, core.register_on_player_join = make_registration()
 core.registered_on_player_leave, core.register_on_player_leave = make_registration()
+core.registered_on_add_active_object, core.register_on_add_active_object = make_registration()
+core.registered_on_remove_active_object, core.register_on_remove_active_object = make_registration()
+core.registered_on_active_object_update_position, core.register_on_active_object_update_position = make_registration()
+core.registered_on_active_object_step, core.register_on_active_object_step = make_registration()

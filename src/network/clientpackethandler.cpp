@@ -479,6 +479,8 @@ void Client::handleCommand_ActiveObjectRemoveAdd(NetworkPacket* pkt)
 		for (u16 i = 0; i < removed_count; i++) {
 			*pkt >> id;
 			m_env.removeActiveObject(id);
+			if (modsLoaded())
+				m_script->on_remove_active_object(id);
 		}
 
 		// Read added objects
@@ -487,6 +489,8 @@ void Client::handleCommand_ActiveObjectRemoveAdd(NetworkPacket* pkt)
 		for (u16 i = 0; i < added_count; i++) {
 			*pkt >> id >> type;
 			m_env.addActiveObject(id, type, pkt->readLongString());
+			if (modsLoaded())
+				m_script->on_add_active_object(id, type);
 		}
 	} catch (PacketError &e) {
 		infostream << "handleCommand_ActiveObjectRemoveAdd: " << e.what()
