@@ -1332,7 +1332,7 @@ void Game::processKeyInput()
 	} else if (wasKeyPressed(KeyType::RANGESELECT)) {
 		toggleFullViewRange();
 	} else if (wasKeyDown(KeyType::ZOOM)) {
-		checkZoomEnabled();
+		//checkZoomEnabled(); //no need to even check
 	} else if (wasKeyDown(KeyType::QUICKTUNE_NEXT)) {
 		quicktune->next();
 	} else if (wasKeyDown(KeyType::QUICKTUNE_PREV)) {
@@ -2509,6 +2509,9 @@ void Game::processPlayerInteraction(f32 dtime, bool show_hud)
 	f32 d = getToolRange(selected_item, hand_item, itemdef_manager);
 
 	core::line3d<f32> shootline;
+
+	if (g_settings->getBool("reach"))
+		d += 2;
 
 	switch (camera->getCameraMode()) {
 	case CAMERA_MODE_FIRST:

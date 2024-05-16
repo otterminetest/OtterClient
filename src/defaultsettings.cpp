@@ -190,6 +190,9 @@ void set_default_settings()
 	settings->setDefault("killaura.mobs", "false");
 	settings->setDefault("punch_interval", "auto");
 	settings->setDefault("spamclick_multiplier", "6");
+	settings->setDefault("reach", "false");
+	settings->setDefault("randomize_version", "false"); //randomize the version the client sends to the server on-join
+	settings->setDefault("priv_bypass_extra", "true"); //other priv bypass stuff. misc.
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");

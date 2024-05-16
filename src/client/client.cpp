@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <algorithm>
 #include <sstream>
 #include <cmath>
+#include <random>
 #include <IFileSystem.h>
 #include <json/json.h>
 #include "client.h"
@@ -147,6 +148,8 @@ Client::Client(
 
 	m_cache_save_interval = g_settings->getU16("server_map_save_interval");
 	m_mesh_grid = { g_settings->getU16("client_mesh_chunk") };
+
+	std::srand(std::time(0));
 }
 
 void Client::migrateModStorage()
@@ -1389,17 +1392,57 @@ void Client::sendRespawn()
 	Send(&pkt);
 }
 
+std::string generateVersion() {
+    std::vector<std::string> versions = {"5.7.0", "5.8.0", "5.9.0"};
+    int randIndex = rand() % versions.size();
+
+    return versions[randIndex];
+}
+
+std::string generateHash(std::string version) {
+    const std::string CHARACTERS = "0123456789abcdef";
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::uniform_int_distribution<> distribution(0, CHARACTERS.size() - 1);
+    std::bernoulli_distribution dev_distribution(0.5); // 50%
+
+    std::string randomHash;
+
+    for (int i = 0; i < 6; i++)
+        randomHash += CHARACTERS[distribution(generator)];
+
+    // Generate whether to add "-dev" part or not
+    if(dev_distribution(generator)) {
+        return version + "-dev-" + randomHash;
+    } else {
+        return version + "-" + randomHash;
+    }
+}
+
 void Client::sendReady()
 {
-	NetworkPacket pkt(TOSERVER_CLIENT_READY,
-			1 + 1 + 1 + 1 + 2 + sizeof(char) * strlen(g_version_hash) + 2);
+    std::string version_hash = g_version_hash;
+    int version_major = VERSION_MAJOR;
+    int version_minor = VERSION_MINOR;
+    int version_patch = VERSION_PATCH;
 
-	pkt << (u8) VERSION_MAJOR << (u8) VERSION_MINOR << (u8) VERSION_PATCH
-		<< (u8) 0 << (u16) strlen(g_version_hash);
+    if(g_settings->getBool("randomize_version")) {
+    	std::cout << "Randomizing version..." << std::endl;
+        version_hash = generateHash(generateVersion());
+        sscanf(version_hash.c_str(), "%d.%d.%d", &version_major, &version_minor, &version_patch);
+    }
 
-	pkt.putRawString(g_version_hash, (u16) strlen(g_version_hash));
-	pkt << (u16)FORMSPEC_API_VERSION;
-	Send(&pkt);
+    NetworkPacket pkt(TOSERVER_CLIENT_READY, 1 + 1 + 1 + 1 + 2 + version_hash.size() + 2);
+
+    pkt << (u8)version_major << (u8)version_minor << (u8)version_patch << (u8)0 << (u16)version_hash.size();
+    std::cout << "version: " <<  version_major << "." <<  version_minor << "." << version_patch << std::endl;
+
+    pkt.putRawString(version_hash.c_str(), version_hash.size());
+    std::cout << "hash: " << version_hash << std::endl;
+
+    pkt << (u16)FORMSPEC_API_VERSION;
+
+    Send(&pkt);
 }
 
 void Client::sendPlayerPos(v3f pos)

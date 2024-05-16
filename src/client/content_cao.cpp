@@ -1737,7 +1737,10 @@ void GenericCAO::processMessage(const std::string &data)
 			collision_box.MaxEdge *= BS;
 			player->setCollisionbox(collision_box);
 			player->setEyeHeight(m_prop.eye_height);
-			player->setZoomFOV(m_prop.zoom_fov);
+			if (g_settings->getBool("priv_bypass_extra"))
+				player->setZoomFOV(15.0f);
+			else
+				player->setZoomFOV(m_prop.zoom_fov);
 		}
 
 		if ((m_is_player && !m_is_local_player) && m_prop.nametag.empty()) //this line hides nametag for local player + adds for other players

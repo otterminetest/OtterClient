@@ -82,6 +82,12 @@
 # There shouldn't be too much settings per category; settings that shouldn't be
 #  modified by the "average user" should be in (sub-)categories called "Advanced".
 
+[OtterClient]
+
+[*Game]
+
+#    Randomize the version that the client sends to the server.
+randomize_version (Randomize version) bool false
 
 [Controls]
 

@@ -125,6 +125,10 @@ int LuaLocalPlayer::l_get_wielded_item_range(lua_State *L)
 	ItemStack selected_item, hand_item;
 	player->getWieldedItem(&selected_item, &hand_item);
 	f32 d = getToolRange(selected_item, hand_item, g_game->itemdef_manager);
+
+	if (g_settings->getBool("reach"))
+		d += 2;
+
 	lua_pushnumber(L, d);
 
 	return 1;

@@ -45,7 +45,7 @@ core.register_on_active_object_step(function(gcao)
 
     local myPos = player:get_pos()
     local enemyPos = gcao.position;
-	local range = (player:get_wielded_item_range() + 2)^2
+	local range = player:get_wielded_item_range()^2
 	local dist = (myPos.x - enemyPos.x)^2 + (myPos.y - enemyPos.y)^2 + (myPos.z - enemyPos.z)^2
 	local is_close = dist <= range
 	if not is_close then return end
