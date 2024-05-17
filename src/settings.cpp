@@ -911,6 +911,9 @@ bool Settings::setGroup(const std::string &name, const Settings &group)
 
 bool Settings::setBool(const std::string &name, bool value)
 {
+	if (name == "killaura.assist" && value && !getBool("killaura.players")) {
+		set("killaura.players", "true");
+	}
 	return set(name, value ? "true" : "false");
 }
 

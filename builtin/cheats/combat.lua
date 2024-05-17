@@ -50,6 +50,14 @@ core.register_on_active_object_step(function(gcao)
 	local is_close = dist <= range
 	if not is_close then return end
 
+	if (core.settings:get_bool("killaura.assist")) then
+		local wield_index = player:get_wield_index() + 1
+		local dmg = core.get_inv_item_damage(wield_index, gcao.id)
+		if (dmg and gcao.hp - dmg.damage <= 1) then
+			return
+		end
+	end
+
     player:punch(gcao.id)
 
     return true
@@ -57,6 +65,7 @@ end)
 
 core.register_cheat("PlayerAura ", "Combat", "killaura.players")
 core.register_cheat("MobAura", "Combat", "killaura.mobs")
+core.register_cheat("AssistAura", "Combat", "killaura.assist")
 
 core.register_chatcommand("fasthit", {
 	params = "<multiplier>",

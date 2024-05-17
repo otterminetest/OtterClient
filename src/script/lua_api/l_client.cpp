@@ -774,6 +774,74 @@ int ModApiClient::l_can_attack(lua_State *L)
 	return 1;
 }
 
+// get_inv_item_damage(index)
+int ModApiClient::l_get_inv_item_damage(lua_State *L)
+{
+	Client *client = getClient(L);
+
+	u32 index = luaL_checkinteger(L, 1) - 1;
+	u16 object_id = lua_tointeger(L, 2);
+
+	InventoryLocation inventory_location;
+	std::string location = "current_player";
+
+	inventory_location.deSerialize(location);
+	Inventory *inventory = client->getInventory(inventory_location);
+	if (!inventory) {
+		lua_pushnil(L);
+		return 0;
+	}
+	InventoryList *list = inventory->getList("main");
+	if (!list) {
+		lua_pushnil(L);
+		return 0;
+	}
+
+	if (index < 0 || index > list->getSize() - 1) {
+		lua_pushnil(L);
+		return 0;
+	}
+
+	ItemStack punchitem;
+	try {
+		punchitem = list->getItem(index);
+	} catch (...) {
+		lua_pushnil(L);
+		return 0;
+	}
+
+	const ToolCapabilities toolcap = punchitem.getToolCapabilities(client->idef());
+
+	ClientEnvironment &env = client->getEnv();
+	GenericCAO *gcao = env.getGenericCAO(object_id);
+	if (!gcao) {
+		lua_pushnil(L);
+		return 0;
+	}
+
+	PunchDamageResult result = getPunchDamageFleshy(
+			gcao->getGroups(),
+			&toolcap,
+			&punchitem,
+			g_game->runData.time_from_last_punch,
+			0
+	);
+
+	push_punch_damage_result(L, &result);
+
+	return 1;
+}
+
+/*
+// get_inv_item_break(index)
+int ModApiClient::l_get_hotbar_item_break(lua_State *L)
+{
+	DigParams getDigParams(const ItemGroupList &groups,
+			const ToolCapabilities *tp,
+			const u16 initial_wear)
+}
+*/
+
 void ModApiClient::Initialize(lua_State *L, int top)
 {
 	API_FCT(get_current_modname);
@@ -815,4 +883,5 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(get_object_or_nil);
 	API_FCT(get_server_url);
 	API_FCT(can_attack);
+	API_FCT(get_inv_item_damage);
 }

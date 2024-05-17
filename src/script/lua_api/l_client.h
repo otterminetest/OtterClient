@@ -144,6 +144,9 @@ private:
 	// can_attack()
 	static int l_can_attack(lua_State *L);
 
+	// get_inv_item_damage(index)
+	static int l_get_inv_item_damage(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 };

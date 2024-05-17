@@ -673,6 +673,16 @@ int LuaLocalPlayer::l_get_time_from_last_punch(lua_State *L)
 	return 1;
 }
 
+// get_hotbar_length(self)
+int LuaLocalPlayer::l_get_hotbar_length(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+	lua_pushnumber(L, player->hud_hotbar_itemcount);
+
+	return 1;
+}
+
+
 const char LuaLocalPlayer::className[] = "LocalPlayer";
 const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, get_velocity),
@@ -721,6 +731,7 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, punch),
 		luamethod(LuaLocalPlayer, get_time_from_last_punch),
 		luamethod(LuaLocalPlayer, get_wielded_item_range),
+		luamethod(LuaLocalPlayer, get_hotbar_length),
 
 		{0, 0}
 };

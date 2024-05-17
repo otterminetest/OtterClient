@@ -119,23 +119,26 @@ private:
 	// set_wield_index(self, index)
 	static int l_set_wield_index(lua_State *L);
 
-	// get_pointed_thing()
+	// get_pointed_thing(self)
 	static int l_get_pointed_thing(lua_State *L);
 
-	// get_object_or_nil()
+	// get_object_or_nil(self)
 	static int l_get_object_or_nil(lua_State *L);
 
-	// is_player_friendly(object_id)
+	// is_player_friendly(self, object_id)
 	static int l_is_player_friendly(lua_State *L);
 
-	// punch(object_id)
+	// punch(self, object_id)
 	static int l_punch(lua_State *L);
 
-	// get_time_from_last_punch()
+	// get_time_from_last_punch(self)
 	static int l_get_time_from_last_punch(lua_State *L);
 
-	// get_wielded_item_range()
+	// get_wielded_item_range(self)
 	static int l_get_wielded_item_range(lua_State *L);
+
+	// get_hotbar_length(self)
+	static int l_get_hotbar_length(lua_State *L);
 
 	static LocalPlayer *getobject(LuaLocalPlayer *ref);
 	static LocalPlayer *getobject(lua_State *L, int narg);
