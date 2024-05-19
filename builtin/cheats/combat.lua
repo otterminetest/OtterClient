@@ -24,7 +24,7 @@ local function get_punch_interval(player)
 end
 
 core.register_on_active_object_step(function(gcao)
-	if (not core.settings:get_bool("killaura.mobs") and not gcao.is_player) then return end
+	if (not core.settings:get_bool("killaura.entities") and not gcao.is_player) then return end
 	if (not core.settings:get_bool("killaura.players") and gcao.is_player) then return end
 
 	if (gcao.is_local_player) then return end
@@ -64,7 +64,7 @@ core.register_on_active_object_step(function(gcao)
 end)
 
 core.register_cheat("PlayerAura ", "Combat", "killaura.players")
-core.register_cheat("MobAura", "Combat", "killaura.mobs")
+core.register_cheat("EntityAura", "Combat", "killaura.entities")
 core.register_cheat("AutoAssist", "Combat", "killaura.assist")
 
 core.register_chatcommand("fasthit", {
