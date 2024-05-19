@@ -194,6 +194,7 @@ void set_default_settings()
 	settings->setDefault("reach", "false");
 	settings->setDefault("randomize_version", "false"); //randomize the version the client sends to the server on-join
 	settings->setDefault("priv_bypass_extra", "true"); //other priv bypass stuff. misc.
+	settings->setDefault("autotool", "false");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");

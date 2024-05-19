@@ -42,6 +42,7 @@ core.cheats = {
 		["InstantBreak"] = "instant_break",
 		["FastHit"] = "spamclick",
 		["AutoHit"] = "autohit",
+		["AutoTool"] = "autotool",
 	},
 	["Player"] = {
 		["NoFallDamage"] = "prevent_natural_damage",
