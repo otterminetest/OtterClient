@@ -1,7 +1,6 @@
 OtterClient
 ===========
-
-![showcase](doc/showcase1.png)
+<img src="doc/showcase1.png" alt="showcase" width="60%" />
 
 A minetest cheat client based off of [DragonFire](https://github.com/dragonfireclient/dragonfireclient) but on Minetest version [5.9.0-dev-df4c9e2](https://github.com/minetest/minetest/tree/df4c9e29034ed77c991d25af1891cd63e7518365).
 Used code from [WaspSaliva](https://repo.or.cz/waspsaliva.git) for circular cheat menus.
