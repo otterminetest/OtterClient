@@ -62,7 +62,3 @@ jobs:
         with:
           name: minetest-macos-arm
           path: ./build/macos/*.zip
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')

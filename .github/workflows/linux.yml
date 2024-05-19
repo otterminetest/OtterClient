@@ -60,10 +60,6 @@ jobs:
           name: minetest-gcc_7
           path: ./bin/minetest
 
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-
   # Current gcc version
   gcc_12:
     runs-on: ubuntu-22.04
@@ -95,10 +91,6 @@ jobs:
           name: minetest-gcc_12
           path: ./bin/minetest
 
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-
   # Older clang version (should be close to our minimum supported version)
   clang_7:
     runs-on: ubuntu-20.04
@@ -126,10 +118,6 @@ jobs:
         with:
           name: minetest-clang_7
           path: ./bin/minetest
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
 
   # Current clang version
   clang_14:
@@ -161,10 +149,6 @@ jobs:
         with:
           name: minetest-clang_14
           path: ./bin/minetest
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
 
   # Build with prometheus-cpp (server-only)
   clang_9_prometheus:
@@ -198,7 +182,3 @@ jobs:
         with:
           name: minetestserver-clang_9_prometheus
           path: ./bin/minetestserver
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
