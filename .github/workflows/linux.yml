@@ -54,6 +54,16 @@ jobs:
         run: |
           ./bin/minetest --run-unittests
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: minetest-gcc_7
+          path: ./bin/minetest
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+
   # Current gcc version
   gcc_12:
     runs-on: ubuntu-22.04
@@ -77,6 +87,17 @@ jobs:
           chmod a-w nowrite
           cd nowrite
           ../bin/minetest --run-unittests
+          cd ..
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: minetest-gcc_12
+          path: ./bin/minetest
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
 
   # Older clang version (should be close to our minimum supported version)
   clang_7:
@@ -95,10 +116,20 @@ jobs:
           CC: clang-7
           CXX: clang++-7
           CMAKE_FLAGS: '-DCMAKE_C_FLAGS="-fsanitize=address" -DCMAKE_CXX_FLAGS="-fsanitize=address"'
-
+          
       - name: Unittest
         run: |
           ./bin/minetest --run-unittests
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: minetest-clang_7
+          path: ./bin/minetest
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
 
   # Current clang version
   clang_14:
@@ -124,6 +155,16 @@ jobs:
       - name: Integration test + devtest
         run: |
           ./util/test_multiplayer.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: minetest-clang_14
+          path: ./bin/minetest
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
 
   # Build with prometheus-cpp (server-only)
   clang_9_prometheus:
@@ -151,3 +192,13 @@ jobs:
       - name: Test
         run: |
           ./bin/minetestserver --run-unittests
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: minetestserver-clang_9_prometheus
+          path: ./bin/minetestserver
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')

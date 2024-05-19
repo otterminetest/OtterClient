@@ -56,3 +56,6 @@ jobs:
       with:
         name: Minetest-x86_64.apk
         path: android/app/build/outputs/apk/release/app-x86_64-release-unsigned.apk
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
