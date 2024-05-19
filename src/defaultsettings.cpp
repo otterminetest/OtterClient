@@ -187,7 +187,7 @@ void set_default_settings()
 	settings->setDefault("friends", "{}");
 	settings->setDefault("ctf_servers", "");
 	settings->setDefault("killaura.players", "true");
-	settings->setDefault("killaura.mobs", "false");
+	settings->setDefault("killaura.entities", "false");
 	settings->setDefault("killaura.assist", "false");
 	settings->setDefault("punch_interval", "auto");
 	settings->setDefault("spamclick_multiplier", "6");

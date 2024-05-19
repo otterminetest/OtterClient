@@ -50,7 +50,7 @@ core.register_chatcommand("say", {
 })
 
 core.register_chatcommand("tp", {
-	params = "<X>,<Y>,<Z>",
+	params = "<X> <Y> <Z>",
 	description = "Teleport to coordinates.",
 	func = function(param)
 		local success, pos = core.parse_pos(param)
@@ -63,7 +63,7 @@ core.register_chatcommand("tp", {
 })
 
 core.register_chatcommand("wielded", {
-	description = "Print itemstring of wieleded item",
+	description = "Print itemstring of wielded item",
 	func = function()
 		return true, core.localplayer:get_wielded_item():to_string()
 	end
@@ -111,7 +111,7 @@ core.register_chatcommand("speed", {
 })
 
 core.register_chatcommand("place", {
-	params = "<X>,<Y>,<Z>",
+	params = "<X> <Y> <Z>",
 	description = "Place wielded item",
 	func = function(param)
 		local success, pos = core.parse_pos(param)

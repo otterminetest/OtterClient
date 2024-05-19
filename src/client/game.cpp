@@ -1589,7 +1589,7 @@ void Game::toggleKillaura()
 	g_settings->set("killaura.players", bool_to_cstr(killaura_players));
 
 	if (!killaura_players) {
-		g_settings->set("killaura.mobs", bool_to_cstr(false));
+		g_settings->set("killaura.entities", bool_to_cstr(false));
 	}
 
 	if (killaura_players) {
