@@ -69,7 +69,8 @@ CheatMenu::CheatMenu(Client *client) : m_client(client)
 	m_entry_height = g_settings->getU32("cheat_menu_entry_height");
 	m_entry_width = g_settings->getU32("cheat_menu_entry_width");
 
-	m_font = g_fontengine->getFont(FONT_SIZE_UNSPECIFIED, fontMode);
+	FontSpec fontSpec(g_fontengine->getDefaultFontSize(), fontMode, true /* bold */, false /* italic */);
+	m_font = g_fontengine->getFont(fontSpec);
 
 	if (!m_font) {
 		errorstream << "CheatMenu: Unable to load font" << std::endl;

@@ -57,6 +57,9 @@ void GameUI::init()
 	// show coords bottom left of screen
 	m_guitext_coords = gui::StaticText::add(guienv, L"", core::rect<s32>(0, 0, 0, 0), false,
 		false, guiroot);
+	FontSpec fontSpec(g_fontengine->getDefaultFontSize()*1.2, FM_Unspecified, true /* bold */, false /* italic */);
+	gui::IGUIFont *coords_font = g_fontengine->getFont(fontSpec);
+	m_guitext_coords->setOverrideFont(coords_font);
 
 	// First line of debug text
 	m_guitext = gui::StaticText::add(guienv, utf8_to_wide(PROJECT_NAME_C).c_str(),
