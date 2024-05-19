@@ -105,6 +105,19 @@ ItemStack &Player::getWieldedItem(ItemStack *selected, ItemStack *hand) const
 	return (hand && selected->name.empty()) ? *hand : *selected;
 }
 
+ItemStack &Player::getHandItem(ItemStack *hand) const
+{
+	assert(hand);
+
+	const InventoryList *hlist = inventory.getList("hand");
+
+	if (hlist)
+		*hand = hlist->getItem(0);
+
+	// Return hand item
+	return *hand;
+}
+
 u32 Player::addHud(HudElement *toadd)
 {
 	MutexAutoLock lock(m_mutex);

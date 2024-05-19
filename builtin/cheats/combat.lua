@@ -65,7 +65,7 @@ end)
 
 core.register_cheat("PlayerAura ", "Combat", "killaura.players")
 core.register_cheat("MobAura", "Combat", "killaura.mobs")
-core.register_cheat("AssistAura", "Combat", "killaura.assist")
+core.register_cheat("AutoAssist", "Combat", "killaura.assist")
 
 core.register_chatcommand("fasthit", {
 	params = "<multiplier>",

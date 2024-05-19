@@ -580,6 +580,18 @@ void push_punch_damage_result(lua_State *L, PunchDamageResult *result)
 	lua_setfield(L, -2, "damage");
 }
 
+// yes, I know push_dig_params exists.
+void push_dig_result(lua_State *L, DigParams *result)
+{
+	lua_newtable(L);
+	lua_pushboolean(L, result->diggable);
+	lua_setfield(L, -2, "diggable");
+	lua_pushnumber(L, result->time);
+	lua_setfield(L, -2, "time");
+	lua_pushnumber(L, result->wear);
+	lua_setfield(L, -2, "wear");
+}
+
 /******************************************************************************/
 TileDef read_tiledef(lua_State *L, int index, u8 drawtype, bool special)
 {

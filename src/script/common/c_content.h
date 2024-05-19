@@ -135,6 +135,9 @@ void               push_object_properties    (lua_State *L,
 void               push_punch_damage_result  (lua_State *L, 
                                               PunchDamageResult *result);
 
+void               push_dig_result           (lua_State *L,
+                                              DigParams *result);
+
 void               push_inventory_list       (lua_State *L,
                                               const InventoryList &invlist);
 void               push_inventory_lists      (lua_State *L,
