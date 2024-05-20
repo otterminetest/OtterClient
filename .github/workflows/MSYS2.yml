@@ -1,33 +1,20 @@
-name: MSYS2
+name: Minetest MSYS2 build
 
 on:
   push:
     paths:
-      - 'lib/**.[ch]'
-      - 'lib/**.cpp'
-      - 'src/**.[ch]'
-      - 'src/**.cpp'
-      - 'irr/**.[ch]'
-      - 'irr/**.cpp'
-      - '**/CMakeLists.txt'
-      - 'cmake/Modules/**'
-      - 'util/buildbot/**'
-      - 'misc/*.manifest'
+      - 'src/**'
+      - 'CMakeLists.txt'
       - '.github/workflows/msys2_build.yml'
   pull_request:
     paths:
-      - 'lib/**.[ch]'
-      - 'lib/**.cpp'
-      - 'src/**.[ch]'
-      - 'src/**.cpp'
-      - '**/CMakeLists.txt'
-      - 'cmake/Modules/**'
-      - 'util/buildbot/**'
-      - 'misc/*.manifest'
+      - 'src/**'
+      - 'CMakeLists.txt'
       - '.github/workflows/msys2_build.yml'
 
 jobs:
-  build:
+  
+  setup:
     runs-on: windows-latest
 
     steps:
@@ -48,7 +35,20 @@ jobs:
       shell: msys2 {0}
       run: |
         pacman -S git mingw-w64-clang-x86_64-{clang,cmake,ninja,curl-winssl,libpng,libjpeg-turbo,freetype,libogg,libvorbis,sqlite3,openal,zstd,gettext,luajit,SDL2} --noconfirm
-    
+
+  build:      
+    needs: setup
+    runs-on: windows-latest
+      
+    steps:  
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        release: false
+
     - name: Compile
       shell: msys2 {0}
       run: |
@@ -74,5 +74,5 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: minetest_MSYS2_windows
+        name: minetest
         path: minetest/minetest.zip
