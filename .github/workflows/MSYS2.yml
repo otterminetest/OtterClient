@@ -1,4 +1,4 @@
-name: Minetest MSYS2 build
+name: MSYS2
 
 on:
   push:
@@ -13,8 +13,7 @@ on:
       - '.github/workflows/msys2_build.yml'
 
 jobs:
-  
-  setup:
+  build:
     runs-on: windows-latest
 
     steps:
@@ -29,26 +28,13 @@ jobs:
     - name: Update environment
       shell: msys2 {0}
       run: |
-        pacman -Syu --noconfirm
+        pacman -Syu --noconfirm --needed
 
     - name: Install dependencies
       shell: msys2 {0}
       run: |
-        pacman -S git mingw-w64-clang-x86_64-{clang,cmake,ninja,curl-winssl,libpng,libjpeg-turbo,freetype,libogg,libvorbis,sqlite3,openal,zstd,gettext,luajit,SDL2} --noconfirm
-
-  build:      
-    needs: setup
-    runs-on: windows-latest
-      
-    steps:  
-    - name: Checkout code
-      uses: actions/checkout@v2
-      
-    - name: Setup MSYS2
-      uses: msys2/setup-msys2@v2
-      with:
-        release: false
-
+        pacman -S git mingw-w64-clang-x86_64-{clang,cmake,ninja,curl-winssl,libpng,libjpeg-turbo,freetype,libogg,libvorbis,sqlite3,openal,zstd,gettext,luajit,SDL2} --noconfirm --needed --overwrite '*'
+    
     - name: Compile
       shell: msys2 {0}
       run: |
