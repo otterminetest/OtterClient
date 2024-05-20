@@ -13,6 +13,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
+        sudo apt install -y libfuse2
         sudo apt install -y g++ make libc6-dev cmake libpng-dev libjpeg-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-gnutls-dev libfreetype6-dev zlib1g-dev libgmp-dev libjsoncpp-dev libzstd-dev libluajit-5.1-dev gettext libsdl2-dev
 
     - name: Prepare AppDir structure
@@ -31,10 +32,15 @@ jobs:
 
     - name: Build AppImage
       run: |
+        sudo apt-get install -y fuse
+        sudo modprobe fuse
+        sudo chmod 666 /dev/fuse
+        sudo cp /etc/fuse.conf /etc/fuse.conf.orig
+        sudo bash -c 'echo "user_allow_other" >> /etc/fuse.conf'
         ./linuxdeployqt-continuous-x86_64.AppImage AppDir/usr/share/applications/your-app.desktop -appimage
 
     - name: Upload AppImage
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
-        name: My_AppImage
+        name: OC_AppImage
         path: ./*.AppImage
