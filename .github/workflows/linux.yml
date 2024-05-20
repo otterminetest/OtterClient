@@ -59,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: minetest-gcc_7
-          path: ./bin/minetest
+          path: ./ # << Changed here
 
   # Current gcc version
   gcc_12:
@@ -91,7 +91,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: minetest-gcc_12
-          path: ./bin/minetest
+          path: ./ # << Changed here
 
   # Older clang version (should be close to our minimum supported version)
   clang_7:
@@ -119,7 +119,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: minetest-clang_7
-          path: ./bin/minetest
+          path: ./ # << Changed here
 
   # Current clang version
   clang_14:
@@ -151,7 +151,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: minetest-clang_14
-          path: ./bin/minetest
+          path: ./ # << Changed here
 
   # Build with prometheus-cpp (server-only)
   clang_9_prometheus:
@@ -184,4 +184,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: minetestserver-clang_9_prometheus
-          path: ./bin/minetestserver
+          path: ./ # << Changed here
