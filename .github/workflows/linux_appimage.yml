@@ -1,0 +1,40 @@
+name: linux_appimage
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y g++ make libc6-dev cmake libpng-dev libjpeg-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-gnutls-dev libfreetype6-dev zlib1g-dev libgmp-dev libjsoncpp-dev libzstd-dev libluajit-5.1-dev gettext libsdl2-dev
+
+    - name: Prepare AppDir structure
+      run: mkdir -p AppDir/usr/bin AppDir/usr/share/applications
+
+    - name: Build project
+      run: |
+        cmake . -DRUN_IN_PLACE=TRUE
+        make -j$(nproc)
+        make install DESTDIR=./AppDir
+
+    - name: Set up linuxdeployqt
+      run: |
+        wget "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+        chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+
+    - name: Build AppImage
+      run: |
+        ./linuxdeployqt-continuous-x86_64.AppImage AppDir/usr/share/applications/your-app.desktop -appimage
+
+    - name: Upload AppImage
+      uses: actions/upload-artifact@v1
+      with:
+        name: My_AppImage
+        path: ./*.AppImage
