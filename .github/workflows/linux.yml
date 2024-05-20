@@ -33,6 +33,7 @@ env:
   MINETEST_POSTGRESQL_CONNECT_STRING: 'host=localhost user=minetest password=minetest dbname=minetest'
 
 jobs:
+
   # Older gcc version (should be close to our minimum supported version)
   gcc_7:
     runs-on: ubuntu-20.04
@@ -55,11 +56,15 @@ jobs:
         run: |
           ./bin/minetest --run-unittests
 
+      - name: Create zip archive
+        run: |
+          zip -r minetest-gcc_7.zip . 
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: minetest-gcc_7
-          path: ./ # << Changed here
+          path: minetest-gcc_7.zip  # upload the zip file
 
   # Current gcc version
   gcc_12:
@@ -87,11 +92,15 @@ jobs:
           ../bin/minetest --run-unittests
           cd ..
 
+      - name: Create zip archive
+        run: |
+          zip -r minetest-gcc_12.zip . 
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: minetest-gcc_12
-          path: ./ # << Changed here
+          path: minetest-gcc_12.zip # upload the zip file
 
   # Older clang version (should be close to our minimum supported version)
   clang_7:
@@ -110,16 +119,20 @@ jobs:
           CC: clang-7
           CXX: clang++-7
           CMAKE_FLAGS: '-DCMAKE_C_FLAGS="-fsanitize=address" -DCMAKE_CXX_FLAGS="-fsanitize=address" -DBUILD_SHARED_LIBS=OFF'
-          
+
       - name: Unittest
         run: |
           ./bin/minetest --run-unittests
-      
+
+      - name: Create zip archive
+        run: |
+          zip -r minetest-clang_7.zip . 
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: minetest-clang_7
-          path: ./ # << Changed here
+          path: minetest-clang_7.zip  # upload the zip file
 
   # Current clang version
   clang_14:
@@ -147,11 +160,15 @@ jobs:
         run: |
           ./util/test_multiplayer.sh
 
+      - name: Create zip archive
+        run: |
+          zip -r minetest-clang_14.zip . 
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: minetest-clang_14
-          path: ./ # << Changed here
+          path: minetest-clang_14.zip  # upload the zip file
 
   # Build with prometheus-cpp (server-only)
   clang_9_prometheus:
@@ -180,8 +197,12 @@ jobs:
         run: |
           ./bin/minetestserver --run-unittests
 
+      - name: Create zip archive
+        run: |
+          zip -r minetestserver-clang_9_prometheus.zip . 
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: minetestserver-clang_9_prometheus
-          path: ./ # << Changed here
+          path: minetestserver-clang_9_prometheus.zip  # upload the zip file
