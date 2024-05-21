@@ -206,32 +206,39 @@ void CheatMenu::draw(video::IVideoDriver *driver, bool show_debug)
 
 void CheatMenu::drawHUD(video::IVideoDriver *driver, double dtime)
 {
-	CHEAT_MENU_GET_SCRIPTPTR
+    CHEAT_MENU_GET_SCRIPTPTR
 
-	m_rainbow_offset += dtime;
+    m_rainbow_offset += dtime;
 
-	m_rainbow_offset = fmod(m_rainbow_offset, 6.0f);
+    m_rainbow_offset = fmod(m_rainbow_offset, 6.0f);
 
-	std::vector<std::string> enabled_cheats;
+    std::vector<std::pair<std::string, core::dimension2d<u32>>> enabled_cheats;
 
-	int cheat_count = 0;
+    int cheat_count = 0;
 
-	for (auto category = script->m_cheat_categories.begin();
-			category != script->m_cheat_categories.end(); category++) {
-		for (auto cheat = (*category)->m_cheats.begin();
-				cheat != (*category)->m_cheats.end(); cheat++) {
-			if ((*cheat)->is_enabled()) {
-				enabled_cheats.push_back((*cheat)->m_name);
-				cheat_count++;
-			}
-		}
-	}
+    for (auto category = script->m_cheat_categories.begin();
+            category != script->m_cheat_categories.end(); category++) {
+        for (auto cheat = (*category)->m_cheats.begin();
+                cheat != (*category)->m_cheats.end(); cheat++) {
+            if ((*cheat)->is_enabled()) {
+                std::string cheat_str = (*cheat)->m_name;
+                core::dimension2d<u32> dim = 
+                            m_font->getDimension(utf8_to_wide(cheat_str).c_str());
+                enabled_cheats.push_back(std::make_pair(cheat_str, dim));
+                cheat_count++;
+            }
+        }
+    }
 
-	if (enabled_cheats.empty())
-		return;
+    if (enabled_cheats.empty())
+        return;
 
     // Sorting enabled_cheats
-    std::sort(enabled_cheats.begin(), enabled_cheats.end());
+    std::sort(enabled_cheats.begin(), enabled_cheats.end(),
+              [](const auto &a, const auto &b) {
+                  return a.second.Width > b.second.Width;
+              }
+    );
 
 	std::vector<video::SColor> colors;
 
@@ -269,16 +276,17 @@ void CheatMenu::drawHUD(video::IVideoDriver *driver, double dtime)
 	u32 y = 5;
 
 	int i = 0;
-	for (std::string cheat : enabled_cheats) {
-		core::dimension2d<u32> dim =
-				m_font->getDimension(utf8_to_wide(cheat).c_str());
-		u32 x = screensize.Width - 5 - dim.Width;
+	for (std::pair<std::string, core::dimension2d<u32>> &cheat : enabled_cheats) {
+	    std::string cheat_str = cheat.first;
+	    core::dimension2d<u32> dim = cheat.second;
 
-		core::rect<s32> fontbounds(x, y, x + dim.Width, y + dim.Height);
-		m_font->draw(cheat.c_str(), fontbounds, colors[i], false, false);
+	    u32 x = screensize.Width - 5 - dim.Width;
 
-		y += dim.Height;
-		i++;
+	    core::rect<s32> fontbounds(x, y, x + dim.Width, y + dim.Height);
+	    m_font->draw(cheat_str.c_str(), fontbounds, colors[i], false, false);
+
+	    y += dim.Height;
+	    i++;
 	}
 }
 
