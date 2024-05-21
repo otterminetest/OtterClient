@@ -124,7 +124,7 @@ void RenderingCore::drawTracersAndESP()
 		env.getAllActiveObjects(allObjects);
 		for (auto &ao_it : allObjects) {
 			ClientActiveObject *cao = ao_it.second;
-			if ((cao->isLocalPlayer() && !g_settings->getBool("freecam")) || cao->getParent())
+			if ((cao->isLocalPlayer() && !g_settings->getBool("freecam")))
 				continue;
 			GenericCAO *obj = dynamic_cast<GenericCAO *>(cao);
 			if (!obj) {
