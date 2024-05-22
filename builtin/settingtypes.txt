@@ -89,6 +89,16 @@
 #    Randomize the version that the client sends to the server.
 randomize_version (Randomize version) bool false
 
+[*Cheats]
+
+xray (XRay) bool false
+
+xray_nodes (XRay Nodes) string default:stone,mcl_core:stone
+
+enable_node_esp (NodeESP) bool false
+
+node_esp_nodes (NodeESP Nodes) string
+
 [Controls]
 
 [*General]
