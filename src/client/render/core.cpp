@@ -242,6 +242,7 @@ void RenderingCore::drawTracersAndESP()
 				if ((intToFloat(p, BS) - player->getLegitPosition()).getLengthSQ() > (wanted_range*BS) * (wanted_range*BS))
 					continue;
 				MapNode node = map.getNode(p);
+				nCnt += 1;
 				u8 diffNeighbors = getDifferentNeighborFlags(p, map, node);
 				if (!diffNeighbors)
 					continue;
@@ -252,7 +253,6 @@ void RenderingCore::drawTracersAndESP()
 					box.MinEdge += pos;
 					box.MaxEdge += pos;
 					if (draw_node_esp) {
-						nCnt += 1;
 						driver->draw3DBox(box, color, nodeDT, nodeEO, nodeFO, diffNeighbors);
 					}
 					if (draw_node_tracers)
