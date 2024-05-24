@@ -2062,6 +2062,18 @@ bool GenericCAO::canAttack(int threshold) {
 	return false;
 }
 
+void GenericCAO::setBoneOverride(const std::string &bone, const BoneOverride &props)
+{
+	BoneOverride fixedProps;
+	// Read new values
+	fixedProps.position.vector = props.position.vector;
+	fixedProps.rotation.next = props.rotation.next;
+	fixedProps.position.absolute = true;
+	fixedProps.rotation.absolute = true;
+
+	m_bone_override[bone] = fixedProps;
+}
+
 std::string GenericCAO::debugInfoText()
 {
 	std::ostringstream os(std::ios::binary);

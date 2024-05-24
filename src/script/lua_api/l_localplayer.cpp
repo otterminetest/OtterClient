@@ -682,7 +682,6 @@ int LuaLocalPlayer::l_get_hotbar_length(lua_State *L)
 	return 1;
 }
 
-
 const char LuaLocalPlayer::className[] = "LocalPlayer";
 const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, get_velocity),

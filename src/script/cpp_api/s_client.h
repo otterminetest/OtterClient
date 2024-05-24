@@ -69,6 +69,7 @@ public:
 	bool on_remove_active_object(u16 id);
 	bool on_active_object_update_position(GenericCAO *gcao);
 	bool on_active_object_step(float dtime, GenericCAO *gcao);
+	bool on_active_object_update_bones(float dtime, GenericCAO *gcao);
 
 	v3f get_send_speed(v3f speed);
 

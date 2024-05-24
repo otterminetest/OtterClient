@@ -480,6 +480,54 @@ bool ScriptApiClient::on_active_object_step(float dtime, GenericCAO *gcao)
 	return readParam<bool>(L, -1);
 }
 
+bool ScriptApiClient::on_active_object_update_bones(float dtime, GenericCAO *gcao)
+{
+	SCRIPTAPI_PRECHECKHEADER
+
+	lua_getglobal(L, "core");
+	lua_getfield(L, -1, "registered_on_active_object_step");
+
+	//push_generic_cao, but with dtime
+	lua_newtable(L);
+	lua_pushnumber(L, dtime);
+	lua_setfield(L, -2, "dtime");
+	lua_pushnumber(L, gcao->getId());
+	lua_setfield(L, -2, "id");
+	lua_pushboolean(L, gcao->isPlayer());
+	lua_setfield(L, -2, "is_player");
+	lua_pushboolean(L, gcao->isLocalPlayer());
+	lua_setfield(L, -2, "is_local_player");
+	lua_pushboolean(L, gcao->isVisible());
+	lua_setfield(L, -2, "is_visible");
+	lua_pushstring(L, gcao->getName().c_str());
+	lua_setfield(L, -2, "name");
+	push_v3f(L, gcao->getPosition() / BS);
+	lua_setfield(L, -2, "position");
+	push_v3f(L, gcao->getVelocity() / BS);
+	lua_setfield(L, -2, "velocity");
+	push_v3f(L, gcao->getAcceleration());
+	lua_setfield(L, -2, "acceleration");
+	push_v3f(L, gcao->getRotation());
+	lua_setfield(L, -2, "rotation");
+	lua_pushnumber(L, gcao->getHp());
+	lua_setfield(L, -2, "hp");
+	lua_pushboolean(L, gcao->isImmortal());
+	lua_setfield(L, -2, "is_immortal");
+	lua_pushboolean(L, gcao->collideWithObjects());
+	lua_setfield(L, -2, "collide_with_objects");
+	push_object_properties(L, &gcao->getProperties());
+	lua_setfield(L, -2, "props");
+
+
+	try {
+		runCallbacks(1, RUN_CALLBACKS_MODE_OR_SC);
+	} catch (LuaError &e) {
+		getClient()->setFatalError(e);
+		return true;
+	}
+	return readParam<bool>(L, -1);
+}
+
 
 v3f ScriptApiClient::get_send_speed(v3f speed)
 {

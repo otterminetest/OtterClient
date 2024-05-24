@@ -90,3 +90,4 @@ core.registered_on_add_active_object, core.register_on_add_active_object = make_
 core.registered_on_remove_active_object, core.register_on_remove_active_object = make_registration()
 core.registered_on_active_object_update_position, core.register_on_active_object_update_position = make_registration()
 core.registered_on_active_object_step, core.register_on_active_object_step = make_registration()
+core.registered_on_active_object_update_bones, core.register_on_active_object_update_bones = make_registration()

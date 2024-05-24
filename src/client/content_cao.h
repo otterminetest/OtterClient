@@ -293,6 +293,8 @@ public:
 
 	bool canAttack(int threshold = 100);
 
+	void setBoneOverride(const std::string &bone, const BoneOverride &props);
+
 	std::string debugInfoText() override;
 
 	std::string infoText() override

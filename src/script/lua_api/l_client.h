@@ -150,6 +150,9 @@ private:
 	// get_inv_item_break(index, nodepos)
 	static int l_get_inv_item_break(lua_State *L);
 
+	// set_bone_position(object_id, bone, position, rotation)
+	static int l_set_bone_position(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 };

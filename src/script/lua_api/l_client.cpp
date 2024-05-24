@@ -919,6 +919,36 @@ int ModApiClient::l_get_inv_item_break(lua_State *L)
 	return 1;
 }
 
+int ModApiClient::l_set_bone_position(lua_State *L) {
+    // id
+    u16 object_id = lua_tointeger(L, 1);
+
+    // Do it
+    ClientEnvironment &env = getClient(L)->getEnv();
+    GenericCAO *gcao = env.getGenericCAO(object_id);
+    if (gcao) {
+        std::string bone;
+        if (!lua_isnoneornil(L, 2))
+            bone = readParam<std::string>(L, 2);
+        BoneOverride props;
+
+        luaL_checktype(L, 3, LUA_TTABLE);
+        if(lua_istable(L, 3)) {
+            props.position.vector = check_v3f(L, 3);
+        }
+
+        luaL_checktype(L, 4, LUA_TTABLE);
+        if(lua_istable(L, 4)) {
+            props.rotation.next = core::quaternion(check_v3f(L, 4) * core::DEGTORAD);
+
+        }
+        props.position.absolute = true;
+        props.rotation.absolute = true;
+        gcao->setBoneOverride(bone, props);
+    }
+    return 0;
+}
+
 void ModApiClient::Initialize(lua_State *L, int top)
 {
 	API_FCT(get_current_modname);
@@ -962,4 +992,5 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(can_attack);
 	API_FCT(get_inv_item_damage);
 	API_FCT(get_inv_item_break);
+	API_FCT(set_bone_position);
 }
