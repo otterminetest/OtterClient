@@ -428,6 +428,30 @@ void ContentFeatures::reset()
 	post_effect_color_shaded = false;
 }
 
+float getColorDistance(const irr::video::SColor& a, const irr::video::SColor& b) {
+    return std::sqrt(std::pow(a.getRed() - b.getRed(), 2) +
+                     std::pow(a.getGreen() - b.getGreen(), 2) +
+                     std::pow(a.getBlue() - b.getBlue(), 2));
+}
+
+video::SColor ContentFeatures::getNodeEspColor() const {
+    static const irr::video::SColor black(0, 0, 0, 0);
+    static const irr::video::SColor white(255, 255, 255, 255);
+
+    float distanceMinimap = minimap_color != NULL && minimap_color != white ? 
+                            getColorDistance(minimap_color, black) : 0.0f;
+    float distancePostEffect = post_effect_color != NULL && post_effect_color != white ? 
+                               getColorDistance(post_effect_color, black) : 0.0f;
+
+    if (distanceMinimap > distancePostEffect) {
+        return minimap_color;
+    } else if (distancePostEffect > distanceMinimap) {
+        return post_effect_color;
+    } else {
+        return black;
+    }
+}
+
 void ContentFeatures::setAlphaFromLegacy(u8 legacy_alpha)
 {
 	switch (drawtype) {

@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "mapgen/mapgen.h" // Mapgen::setDefaultSettings
 #include "util/string.h"
 
+
 /*
  * inspired by https://github.com/systemd/systemd/blob/7aed43437175623e0f3ae8b071bbc500c13ce893/src/hostname/hostnamed.c#L406
  * this could be done in future with D-Bus using query:
@@ -194,6 +195,20 @@ void set_default_settings()
 	settings->setDefault("randomize_version", "false"); //randomize the version the client sends to the server on-join
 	settings->setDefault("priv_bypass_extra", "true"); //other priv bypass stuff. misc.
 	settings->setDefault("autotool", "false");
+
+	settings->setDefault("esp.player.drawType", "0");
+	settings->setDefault("esp.player.edgeOpacity", "255");
+	settings->setDefault("esp.player.faceOpacity", "100");
+
+	settings->setDefault("esp.entity.drawType", "0");
+	settings->setDefault("esp.entity.edgeOpacity", "255");
+	settings->setDefault("esp.entity.faceOpacity", "100");
+
+	settings->setDefault("esp.node.drawType", "2");
+	settings->setDefault("esp.node.edgeOpacity", "255");
+	settings->setDefault("esp.node.faceOpacity", "200");
+
+	settings->setDefault("silence", "false");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");

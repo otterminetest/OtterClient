@@ -63,9 +63,9 @@ core.register_on_active_object_step(function(gcao)
     return true
 end)
 
-core.register_cheat("PlayerAura ", "Combat", "killaura.players")
-core.register_cheat("EntityAura", "Combat", "killaura.entities")
-core.register_cheat("AutoAssist", "Combat", "killaura.assist")
+core.register_cheat("PlayerAura ", "1.Combat", "killaura.players")
+core.register_cheat("EntityAura", "1.Combat", "killaura.entities")
+core.register_cheat("AutoAssist", "1.Combat", "killaura.assist")
 
 core.register_chatcommand("fasthit", {
 	params = "<multiplier>",

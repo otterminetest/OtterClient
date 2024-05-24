@@ -114,12 +114,20 @@ core.register_chatcommand("place", {
 	params = "<X> <Y> <Z>",
 	description = "Place wielded item",
 	func = function(param)
+		if param == "" then
+			local myPos = core.localplayer:get_pos()
+			myPos.y = myPos.y - 1;
+			core.place_node(myPos)
+			return true, "Node placed at " .. core.pos_to_string(myPos)
+		end
+
 		local success, pos = core.parse_pos(param)
 		if success then
 			core.place_node(pos)
 			return true, "Node placed at " .. core.pos_to_string(pos)
 		end
-		return false, pos
+
+		return false, "Invalid position"
 	end,
 })
 

@@ -530,6 +530,9 @@ struct ContentFeatures
 		return itemgroup_get(groups, group);
 	}
 
+
+	video::SColor getNodeEspColor() const;
+
 #ifndef SERVER
 	void updateTextures(ITextureSource *tsrc, IShaderSource *shdsrc,
 		scene::IMeshManipulator *meshmanip, Client *client, const TextureSettings &tsettings);
