@@ -1,9 +1,9 @@
 core.cheats = {
-	["Combat"] = {
+	["1.Combat"] = {
 		["AntiKnockback"] = "antiknockback",
 		["AttachmentFloat"] = "float_above_parent",
 	},
-	["Movement"] = {
+	["2.Movement"] = {
 		["Freecam"] = "freecam",
 		["AutoForward"] = "continuous_forward",
 		["PitchMove"] = "pitch_move",
@@ -19,7 +19,7 @@ core.cheats = {
 		["Spider"] = "spider",
 		["AutoSneak"] = "autosneak",
 	},
-	["Render"] = {
+	["3.Render"] = {
 		["Xray"] = "xray",
 		["Fullbright"] = "fullbright",
 		["HUDBypass"] = "hud_flags_bypass",
@@ -34,7 +34,7 @@ core.cheats = {
 		["NodeTracers"] = "enable_node_tracers",
 		["NoRender"] = "norender.particles",
 	},
-	["Interact"] = {
+	["4.Interact"] = {
 		["FastDig"] = "fastdig",
 		["FastPlace"] = "fastplace",
 		["AutoDig"] = "autodig",
@@ -44,13 +44,16 @@ core.cheats = {
 		["AutoHit"] = "autohit",
 		["AutoTool"] = "autotool",
 	},
-	["Player"] = {
+	["5.Player"] = {
 		["NoFallDamage"] = "prevent_natural_damage",
 		--["NoForceRotate"] = "no_force_rotate",
 		["Reach"] = "reach",
 		--["PointLiquids"] = "point_liquids",
 		["AutoRespawn"] = "autorespawn",
 		--["ThroughWalls"] = "dont_point_nodes",
+	},
+	["6.Misc"] = {
+		["Silence"] = "silence",
 	}
 }
 

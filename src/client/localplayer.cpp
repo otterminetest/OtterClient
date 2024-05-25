@@ -316,7 +316,6 @@ void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 		}
 	}
 
-
 	/*
 		Check if player is in liquid (the stable value)
 	*/

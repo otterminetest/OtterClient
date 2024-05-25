@@ -36,6 +36,14 @@ ScriptApiCheatsCheat::ScriptApiCheatsCheat(const std::string &name, const int &f
 {
 }
 
+void ScriptApiCheatsCheat::set_info_text(std::string infoText) {
+	m_info_text = infoText;
+}
+
+std::string ScriptApiCheatsCheat::get_info_text() {
+	return m_info_text;
+}
+
 bool ScriptApiCheatsCheat::is_enabled()
 {
 	try {
@@ -93,6 +101,14 @@ void ScriptApiCheatsCategory::read_cheats(lua_State *L)
 	}
 }
 
+ScriptApiCheatsCheat* ScriptApiCheatsCategory::get_cheat(const std::string &name) {
+	for (auto& cheat : m_cheats) {
+		if (cheat->m_name == name) 
+			return cheat;
+	}
+	return nullptr;
+}
+
 ScriptApiCheats::~ScriptApiCheats()
 {
 	for (auto i = m_cheat_categories.begin(); i != m_cheat_categories.end(); i++)
@@ -128,7 +144,7 @@ void ScriptApiCheats::init_cheats()
         lua_pushstring(L, key.c_str());
         lua_gettable(L, -2);
         if (lua_istable(L, -1)) {
-            ScriptApiCheatsCategory *category = new ScriptApiCheatsCategory(key.c_str());
+            ScriptApiCheatsCategory *category = new ScriptApiCheatsCategory(key.substr(2).c_str());
             category->read_cheats(L);
             m_cheat_categories.push_back(category);
         }
@@ -148,4 +164,12 @@ void ScriptApiCheats::toggle_cheat(ScriptApiCheatsCheat *cheat)
 	lua_insert(L, error_handler);
 
 	cheat->toggle(L, error_handler);
+}
+
+ScriptApiCheatsCategory* ScriptApiCheats::get_category(const std::string &name) {
+    for (auto& category : m_cheat_categories) {
+        if (category->m_name == name) 
+            return category;
+    }
+    return nullptr;
 }

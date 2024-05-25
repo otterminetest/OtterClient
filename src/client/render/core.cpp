@@ -30,6 +30,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/hud.h"
 #include "nodedef.h"
 #include "client/mapblock_mesh.h"
+#include "script/scripting_client.h"
+
+static const v3s16 directions[6] = {
+    v3s16(0, 0, -1),  // Front
+    v3s16(0, 0, 1), // Back
+    v3s16(-1, 0, 0), // Left
+    v3s16(1, 0, 0),  // Right
+    v3s16(0, 1, 0),  // Top
+    v3s16(0, -1, 0)  // Bottom
+};
+
+// Function to check each neighbor and return the flags of different ones.
+u8 getDifferentNeighborFlags(v3s16 p, Map &map, const MapNode &node) {
+	u8 flags = 0;
+	for (int i = 0; i < 6; ++i) {
+		MapNode neighbor = map.getNode(p + directions[i]);
+		if (neighbor.getContent() != node.getContent()) {
+			flags |= (1 << i);
+		}
+	}
+	return flags;
+}
 
 RenderingCore::RenderingCore(IrrlichtDevice *_device, Client *_client, Hud *_hud,
 		ShadowRenderer *_shadow_renderer, RenderPipeline *_pipeline, v2f _virtual_size_scale)
@@ -84,25 +106,59 @@ v2u32 RenderingCore::getVirtualSize() const
 	return virtual_size;
 }
 
+std::string getEspInfoText(bool enabled, int drawType, int count) {
+    if (!enabled)
+        return "";
 
+    std::string countText = ", "+std::to_string(count);
+
+    switch (drawType) {
+        case 0:
+            return "lines" + countText;
+        case 1:
+            return "sides" + countText;
+        case 2:
+            return "both" + countText;
+        default:
+            return "";
+    }
+}
 
 void RenderingCore::drawTracersAndESP()
 {
 	auto driver = device->getVideoDriver();
 
-	draw_entity_esp = g_settings->getBool("enable_entity_esp");
-	draw_entity_tracers = g_settings->getBool("enable_entity_tracers");
 	draw_player_esp = g_settings->getBool("enable_player_esp");
 	draw_player_tracers = g_settings->getBool("enable_player_tracers");
+	draw_entity_esp = g_settings->getBool("enable_entity_esp");
+	draw_entity_tracers = g_settings->getBool("enable_entity_tracers");
 	draw_node_esp = g_settings->getBool("enable_node_esp");
 	draw_node_tracers = g_settings->getBool("enable_node_tracers");
 	entity_esp_color = video::SColor(255, 255, 255, 255);
 	friend_esp_color = video::SColor(255, 0, 255, 0);
 	enemy_esp_color = video::SColor(255, 255, 0, 0);
 
+	int playerDT = g_settings->getU32("esp.player.drawType");
+	int playerEO = g_settings->getU32("esp.player.edgeOpacity");
+	int playerFO = g_settings->getU32("esp.player.faceOpacity");
+	int entityDT = g_settings->getU32("esp.entity.drawType");
+	int entityEO = g_settings->getU32("esp.entity.edgeOpacity");
+	int entityFO = g_settings->getU32("esp.entity.faceOpacity");
+	int nodeDT = g_settings->getU32("esp.node.drawType");
+	int nodeEO = g_settings->getU32("esp.node.edgeOpacity");
+	int nodeFO = g_settings->getU32("esp.node.faceOpacity");
+
+	ScriptApiCheatsCategory* render_category = client->getScript()->get_category("Render");
+	ScriptApiCheatsCheat* player_esp_cheat = render_category->get_cheat("PlayerESP");
+	ScriptApiCheatsCheat* entity_esp_cheat = render_category->get_cheat("EntityESP");
+	ScriptApiCheatsCheat* node_esp_cheat = render_category->get_cheat("NodeESP");
+
 	ClientEnvironment &env = client->getEnv();
+	ClientMap &clientMap = env.getClientMap();
 	Camera *camera = client->getCamera();
 	LocalPlayer *player = env.getLocalPlayer();
+
+	u8 wanted_range  = std::fmin(255.0f, clientMap.getWantedRange());
 
 	v3f camera_offset = intToFloat(camera->getOffset(), BS);
 
@@ -118,6 +174,8 @@ void RenderingCore::drawTracersAndESP()
 	material.ZBuffer = false;
 	material.ZWriteEnable = irr::video::EZW_OFF;
 	driver->setMaterial(material);
+
+	int pCnt = 0, eCnt = 0, nCnt = 0;
 
  	if (draw_entity_esp || draw_entity_tracers || draw_player_esp || draw_player_tracers) {
 		std::unordered_map<u16, ClientActiveObject*> allObjects;
@@ -158,8 +216,15 @@ void RenderingCore::drawTracersAndESP()
 			box.MinEdge += pos;
 			box.MaxEdge += pos;
 
-			if (draw_esp)
-				driver->draw3DBox(box, color);
+			if (draw_esp) {
+				if (is_player) {
+					pCnt += 1;
+					driver->draw3DBox(box, color, playerDT, playerEO, playerFO);
+				} else {
+					eCnt += 1;
+					driver->draw3DBox(box, color, entityDT, entityEO, entityFO);
+				}
+			}
 			if (draw_tracers)
 				driver->draw3DLine(eye_pos, box.getCenter(), color);
 		}
@@ -174,15 +239,22 @@ void RenderingCore::drawTracersAndESP()
 				continue;
 			for (v3s16 p : block->mesh->esp_nodes) {
 				v3f pos = intToFloat(p, BS) - camera_offset;
+				if ((intToFloat(p, BS) - player->getLegitPosition()).getLengthSQ() > (wanted_range*BS) * (wanted_range*BS))
+					continue;
 				MapNode node = map.getNode(p);
+				nCnt += 1;
+				u8 diffNeighbors = getDifferentNeighborFlags(p, map, node);
+				if (!diffNeighbors)
+					continue;
 				std::vector<aabb3f> boxes;
 				node.getSelectionBoxes(client->getNodeDefManager(), &boxes, node.getNeighbors(p, &map));
-				video::SColor color = client->getNodeDefManager()->get(node).minimap_color;
+				video::SColor color = client->getNodeDefManager()->get(node).getNodeEspColor();
 				for (aabb3f box : boxes) {
 					box.MinEdge += pos;
 					box.MaxEdge += pos;
-					if (draw_node_esp)
-						driver->draw3DBox(box, color);
+					if (draw_node_esp) {
+						driver->draw3DBox(box, color, nodeDT, nodeEO, nodeFO, diffNeighbors);
+					}
 					if (draw_node_tracers)
 						driver->draw3DLine(eye_pos, box.getCenter(), color);
 				}
@@ -191,6 +263,20 @@ void RenderingCore::drawTracersAndESP()
 	}
 
 	driver->setMaterial(oldmaterial);
+
+	// set info text
+	std::string pEspInfo = getEspInfoText(draw_player_esp, playerDT, pCnt);
+	if (!pEspInfo.empty()) {
+		player_esp_cheat->set_info_text(pEspInfo);
+	}
+	std::string eEspInfo = getEspInfoText(draw_entity_esp, entityDT, eCnt);
+	if (!eEspInfo.empty()) {
+		entity_esp_cheat->set_info_text(eEspInfo);
+	}
+	std::string nEspInfo = getEspInfoText(draw_node_esp, nodeDT, nCnt);
+	if (!nEspInfo.empty()) {
+		node_esp_cheat->set_info_text(nEspInfo);
+	}
 }
 
 void RenderingCore::Draw3D(PipelineContext &context)

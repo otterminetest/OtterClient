@@ -353,8 +353,8 @@ struct ContentFeatures
 	std::string mesh;
 #ifndef SERVER
 	scene::IMesh *mesh_ptr[24];
-	video::SColor minimap_color;
 #endif
+	video::SColor minimap_color;
 	float visual_scale; // Misc. scale parameter
 	TileDef tiledef[6];
 	// These will be drawn over the base tiles.
@@ -529,6 +529,9 @@ struct ContentFeatures
 	{
 		return itemgroup_get(groups, group);
 	}
+
+
+	video::SColor getNodeEspColor() const;
 
 #ifndef SERVER
 	void updateTextures(ITextureSource *tsrc, IShaderSource *shdsrc,
