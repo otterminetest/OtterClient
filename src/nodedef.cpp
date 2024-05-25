@@ -429,9 +429,9 @@ void ContentFeatures::reset()
 }
 
 float getColorDistance(const irr::video::SColor& a, const irr::video::SColor& b) {
-    return std::sqrt(std::pow(a.getRed() - b.getRed(), 2) +
+    return std::pow(a.getRed() - b.getRed(), 2) +
                      std::pow(a.getGreen() - b.getGreen(), 2) +
-                     std::pow(a.getBlue() - b.getBlue(), 2));
+                     std::pow(a.getBlue() - b.getBlue(), 2);
 }
 
 video::SColor ContentFeatures::getNodeEspColor() const {
