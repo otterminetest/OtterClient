@@ -373,8 +373,8 @@ void ContentFeatures::reset()
 #ifndef SERVER
 	for (auto &i : mesh_ptr)
 		i = NULL;
-	minimap_color = video::SColor(0, 0, 0, 0);
 #endif
+	minimap_color = video::SColor(0, 0, 0, 0);
 	visual_scale = 1.0;
 	for (auto &i : tiledef)
 		i = TileDef();
