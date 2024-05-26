@@ -1222,6 +1222,25 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 	event->hudadd->text2     = text2;
 	event->hudadd->style     = style;
 	m_client_event_queue.push(event);
+
+	/*
+    std::cout << "server_id: " << server_id << "\n"
+              << "type: " << static_cast<int>(type) << "\n"
+              << "pos: {" << "X: " << pos.X << ", Y: " << pos.Y << "}\n"
+              << "name: " << name << "\n"
+              << "scale: {" << "X: " << scale.X << ", Y: " << scale.Y << "}\n"
+              << "text: " << text << "\n"
+              << "number: " << number << "\n"
+              << "item: " << item << "\n"
+              << "dir: " << dir << "\n"
+              << "align: {" << "X: " << align.X << ", Y: " << align.Y << "}\n"
+              << "offset: {" << "X: " << offset.X << ", Y: " << offset.Y << "}\n"
+              << "world_pos: {" << "X: " << world_pos.X << ", Y: " << world_pos.Y << ", Z: " << world_pos.Z << "}\n"
+              << "size: {" << "X: " << size.X << ", Y: " << size.Y << "}\n"
+              << "z_index: " << z_index << "\n"
+              << "text2: " << text2 << "\n"
+              << "style: " << style << "\n";
+    */
 }
 
 void Client::handleCommand_HudRemove(NetworkPacket* pkt)
