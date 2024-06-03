@@ -919,6 +919,20 @@ int ModApiClient::l_get_inv_item_break(lua_State *L)
 	return 1;
 }
 
+// print_esp_colors()
+int ModApiClient::l_print_esp_colors(lua_State *L)
+{
+	IGameDef *gdef = getGameDef(L);
+	assert(gdef);
+
+	const NodeDefManager *ndef = gdef->ndef();
+	assert(ndef);
+
+	ndef->printESPColors();
+
+	return 0;
+}
+
 void ModApiClient::Initialize(lua_State *L, int top)
 {
 	API_FCT(get_current_modname);
@@ -962,4 +976,5 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(can_attack);
 	API_FCT(get_inv_item_damage);
 	API_FCT(get_inv_item_break);
+	API_FCT(print_esp_colors);
 }

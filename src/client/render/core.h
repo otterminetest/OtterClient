@@ -49,6 +49,8 @@ protected:
 	bool draw_player_tracers;
 	bool draw_node_esp;
 	bool draw_node_tracers;
+	bool draw_tunnel_esp;
+	bool draw_tunnel_tracers;
 	video::SColor entity_esp_color;
 	video::SColor friend_esp_color;
 	video::SColor enemy_esp_color;

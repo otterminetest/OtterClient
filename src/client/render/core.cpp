@@ -134,6 +134,9 @@ void RenderingCore::drawTracersAndESP()
 	draw_entity_tracers = g_settings->getBool("enable_entity_tracers");
 	draw_node_esp = g_settings->getBool("enable_node_esp");
 	draw_node_tracers = g_settings->getBool("enable_node_tracers");
+	draw_tunnel_esp = g_settings->getBool("enable_tunnel_esp");
+	draw_tunnel_tracers = g_settings->getBool("enable_tunnel_tracers");
+
 	entity_esp_color = video::SColor(255, 255, 255, 255);
 	friend_esp_color = video::SColor(255, 0, 255, 0);
 	enemy_esp_color = video::SColor(255, 255, 0, 0);
@@ -147,11 +150,15 @@ void RenderingCore::drawTracersAndESP()
 	int nodeDT = g_settings->getU32("esp.node.drawType");
 	int nodeEO = g_settings->getU32("esp.node.edgeOpacity");
 	int nodeFO = g_settings->getU32("esp.node.faceOpacity");
+	int tunnelDT = g_settings->getU32("esp.tunnel.drawType");
+	int tunnelEO = g_settings->getU32("esp.tunnel.edgeOpacity");
+	int tunnelFO = g_settings->getU32("esp.tunnel.faceOpacity");
 
 	ScriptApiCheatsCategory* render_category = client->getScript()->get_category("Render");
 	ScriptApiCheatsCheat* player_esp_cheat = render_category->get_cheat("PlayerESP");
 	ScriptApiCheatsCheat* entity_esp_cheat = render_category->get_cheat("EntityESP");
 	ScriptApiCheatsCheat* node_esp_cheat = render_category->get_cheat("NodeESP");
+	ScriptApiCheatsCheat* tunnel_esp_cheat = render_category->get_cheat("TunnelESP");
 
 	ClientEnvironment &env = client->getEnv();
 	ClientMap &clientMap = env.getClientMap();
@@ -175,7 +182,7 @@ void RenderingCore::drawTracersAndESP()
 	material.ZWriteEnable = irr::video::EZW_OFF;
 	driver->setMaterial(material);
 
-	int pCnt = 0, eCnt = 0, nCnt = 0;
+	int pCnt = 0, eCnt = 0, nCnt = 0, tCnt = 0;
 
  	if (draw_entity_esp || draw_entity_tracers || draw_player_esp || draw_player_tracers) {
 		std::unordered_map<u16, ClientActiveObject*> allObjects;
@@ -229,7 +236,7 @@ void RenderingCore::drawTracersAndESP()
 				driver->draw3DLine(eye_pos, box.getCenter(), color);
 		}
 	}
-	if (draw_node_esp || draw_node_tracers) {
+	if (draw_node_esp || draw_node_tracers || draw_tunnel_esp || draw_tunnel_tracers) {
 		Map &map = env.getMap();
 		std::vector<v3s16> positions;
 		map.listAllLoadedBlocks(positions);
@@ -237,6 +244,8 @@ void RenderingCore::drawTracersAndESP()
 			MapBlock *block = map.getBlockNoCreate(blockp);
 			if (!block->mesh)
 				continue;
+
+			// NodeESP
 			for (v3s16 p : block->mesh->esp_nodes) {
 				v3f pos = intToFloat(p, BS) - camera_offset;
 				if ((intToFloat(p, BS) - player->getLegitPosition()).getLengthSQ() > (wanted_range*BS) * (wanted_range*BS))
@@ -259,6 +268,38 @@ void RenderingCore::drawTracersAndESP()
 						driver->draw3DLine(eye_pos, box.getCenter(), color);
 				}
 			}
+
+			// TunnelESP
+			for (v3s16 p : block->mesh->tunnel_esp_nodes) {
+				// this check will fail on map block edges but oh well
+				u8 flags = 0;
+				for (int i = 0; i < 6; ++i) {
+					v3s16 neighborP = p + directions[i];
+					if (block->mesh->tunnel_esp_nodes.find(neighborP) == block->mesh->tunnel_esp_nodes.end()) {
+						flags |= (1 << i);
+					}
+				}
+				if (!flags)
+					continue;
+				// continue with render
+				v3f pos = intToFloat(p, BS) - camera_offset;
+				if ((intToFloat(p, BS) - player->getLegitPosition()).getLengthSQ() > (wanted_range*BS) * (wanted_range*BS))
+					continue;
+				MapNode node = map.getNode(p);
+				tCnt += 1;
+				std::vector<aabb3f> boxes;
+				node.getSelectionBoxes(client->getNodeDefManager(), &boxes, node.getNeighbors(p, &map));
+				video::SColor color = video::SColor(128, 128, 128, 128);
+				for (aabb3f box : boxes) {
+					box.MinEdge += pos;
+					box.MaxEdge += pos;
+					if (draw_tunnel_esp) {
+						driver->draw3DBox(box, color, tunnelDT, tunnelEO, tunnelFO, flags);
+					}
+					if (draw_tunnel_tracers)
+						driver->draw3DLine(eye_pos, box.getCenter(), color);
+				}
+			}
 		}
 	}
 
@@ -276,6 +317,10 @@ void RenderingCore::drawTracersAndESP()
 	std::string nEspInfo = getEspInfoText(draw_node_esp, nodeDT, nCnt);
 	if (!nEspInfo.empty()) {
 		node_esp_cheat->set_info_text(nEspInfo);
+	}
+	std::string tEspInfo = getEspInfoText(draw_tunnel_esp, nodeDT, tCnt);
+	if (!tEspInfo.empty()) {
+		tunnel_esp_cheat->set_info_text(tEspInfo);
 	}
 }
 
