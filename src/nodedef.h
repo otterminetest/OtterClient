@@ -757,6 +757,11 @@ public:
 	 */
 	void resolveCrossrefs();
 
+	/*!
+	 * Print out node ESP colors to console.
+	 */
+	void printESPColors() const;
+
 private:
 	/*!
 	 * Resets the manager to its initial state.

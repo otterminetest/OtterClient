@@ -658,6 +658,123 @@ void PartialMeshBuffer::afterDraw() const
 /*
 	MapBlockMesh
 */
+bool canWalkThrough(v3s16 pos, MeshMakeData *data) {
+	const MapNode &node = data->m_vmanip.getNodeRefUnsafeCheckFlags(pos);
+	const ContentFeatures &f = data->nodedef->get(node);
+	return !f.walkable && !f.isLiquid();
+}
+
+bool canWalkOn(v3s16 pos, MeshMakeData *data) {
+	const MapNode &node = data->m_vmanip.getNodeRefUnsafeCheckFlags(pos);
+	const ContentFeatures &f = data->nodedef->get(node);
+	return f.walkable;
+}
+
+bool isValidPotentialTunnelSpace(v3s16 pos, int max_height, int max_width, MeshMakeData *data) {
+    bool valid = false;    
+
+    bool x_valid = false;
+    bool y_valid = false;
+    bool z_valid = false;
+
+    // Y Axis
+    int depth = 0;
+    int height = 0;
+    for (int h = 1; h <= max_height; h++) {
+        v3s16 t_pos_floor = pos + v3s16(0, -h, 0);  
+        if (canWalkOn(t_pos_floor, data)) {
+            break;
+        }
+        depth = h;
+    }
+    for (int h = 1; h <= max_height; h++) {
+        v3s16 t_pos_ceil = pos + v3s16(0, h, 0);
+        
+        if (canWalkOn(t_pos_ceil, data)) {
+            break;
+        }
+        height = h;
+    }
+    if (depth + height + 1 <= max_height)
+        y_valid = true;
+
+    if (!y_valid)
+        return false;
+
+    // X Axis
+    int left = 0;
+    int right = 0;
+    for (int x = 1; x <= max_width; x++) {
+        v3s16 t_pos_left = pos + v3s16(-x, 0, 0);        
+        if (canWalkOn(t_pos_left, data)) {
+            break;
+        }
+        left = x;
+    }
+    for (int x = 1; x <= max_width; x++) {
+        v3s16 t_pos_right = pos + v3s16(x, 0, 0);
+        
+        if (canWalkOn(t_pos_right, data)) {
+            break;
+        }
+        right = x;
+    }
+    if (left + right + 1 <= max_width)
+        x_valid = true;
+
+    // Z Axis
+    int backwards = 0;
+    int forwards = 0;
+    for (int z = 1; z <= max_width; z++) {
+        v3s16 t_pos_backwards = pos + v3s16(0, 0, -z);        
+        if (canWalkOn(t_pos_backwards, data)) {
+            break;
+        }
+        backwards = z;
+    }
+    for (int z = 1; z <= max_width; z++) {
+        v3s16 t_pos_forwards = pos + v3s16(0, 0, z);
+        
+        if (canWalkOn(t_pos_forwards, data)) {
+            break;
+        }
+        forwards = z;
+    }
+    if (backwards + forwards + 1 <= max_width)
+        z_valid = true;
+
+    if (x_valid ^ z_valid)
+        valid = true;
+
+    return valid;
+}
+
+bool isTunnelNode(v3s16 pos, int height, int width, MeshMakeData *data) {
+    for(int h = 0; h <= height; h++) {
+        if (canWalkThrough(pos+v3s16(0,h,0), data) && !canWalkThrough(pos+v3s16(0,h+1,0), data)) {
+            for (int w = -width; w <= width; w++) {
+                // Z
+                if ((w != 0) && 
+                    (((!canWalkThrough(pos+v3s16(-1, h, w), data) && !canWalkThrough(pos+v3s16(1, h, w), data))
+                    && canWalkThrough(pos+v3s16(0, h, 1+w), data) && canWalkThrough(pos+v3s16(0, h, -1+w), data))
+                    || (canWalkThrough(pos+v3s16(-1, h, w), data) && canWalkThrough(pos+v3s16(1, h, w), data)
+                    && !canWalkThrough(pos+v3s16(0, h, 1+w), data) && !canWalkThrough(pos+v3s16(0, h, -1+w), data)) )) {
+                        return true;
+                }
+          
+                // X
+                if ((w != 0) && 
+                    (((!canWalkThrough(pos+v3s16(w, h, -1), data) && !canWalkThrough(pos+v3s16(w, h, 1), data))
+                    && canWalkThrough(pos+v3s16(1+w, h, 0), data) && canWalkThrough(pos+v3s16(-1+w, h, 0), data))
+                    || (canWalkThrough(pos+v3s16(w, h, -1), data) && canWalkThrough(pos+v3s16(w, h, 1), data)
+                    && !canWalkThrough(pos+v3s16(1+w, h, 0), data) && !canWalkThrough(pos+v3s16(-1+w, h, 0), data)) )) {
+                        return true;
+                }
+            }
+        }
+    }
+    return false;
+}
 
 MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data, v3s16 camera_offset):
 	m_tsrc(client->getTextureSource()),
@@ -689,23 +806,6 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data, v3s16 camera_offs
 				MinimapMapblock *block = new MinimapMapblock;
 				m_minimap_mapblocks[mesh_grid.getOffsetIndex(ofs)] = block;
 				block->getMinimapNodes(&data->m_vmanip, p);
-			}
-		}
-	}
-
-	/*
-		NodeESP
-	*/
-	{
-		v3s16 blockpos_nodes = data->m_blockpos * MAP_BLOCKSIZE;
-		for (s16 x = 0; x < MAP_BLOCKSIZE; x++) {
-			for (s16 y = 0; y < MAP_BLOCKSIZE; y++) {
-				for (s16 z = 0; z < MAP_BLOCKSIZE; z++) {
-					v3s16 pos = v3s16(x, y, z) + blockpos_nodes;
-					const MapNode &node = data->m_vmanip.getNodeRefUnsafeCheckFlags(pos);
-					if (nodeESPSet.find(node.getContent()) != nodeESPSet.end())
-						esp_nodes.insert(pos);
-				}
 			}
 		}
 	}
@@ -873,6 +973,51 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data, v3s16 camera_offs
 		!m_crack_materials.empty() ||
 		!m_daynight_diffs.empty() ||
 		!m_animation_info.empty();
+
+	/*
+		NodeESP
+	*/
+	{
+		v3s16 blockpos_nodes = data->m_blockpos * MAP_BLOCKSIZE;
+		for (s16 x = 0; x < MAP_BLOCKSIZE; x++) {
+			for (s16 y = 0; y < MAP_BLOCKSIZE; y++) {
+				for (s16 z = 0; z < MAP_BLOCKSIZE; z++) {
+					v3s16 pos = v3s16(x, y, z) + blockpos_nodes;
+					const MapNode &node = data->m_vmanip.getNodeRefUnsafeCheckFlags(pos);
+					if (nodeESPSet.find(node.getContent()) != nodeESPSet.end())
+						esp_nodes.insert(pos);
+				}
+			}
+		}
+	}
+
+	/*
+		TunnelESP
+	*/
+	{
+		v3s16 blockpos_nodes = data->m_blockpos * MAP_BLOCKSIZE;
+		for (s16 x = 0; x < MAP_BLOCKSIZE; x++) {
+			for (s16 y = 0; y < MAP_BLOCKSIZE; y++) {
+				for (s16 z = 0; z < MAP_BLOCKSIZE; z++) {
+					v3s16 pos = v3s16(x, y, z) + blockpos_nodes;
+
+					if (!canWalkThrough(pos, data))
+						continue;
+
+					if (tunnel_esp_nodes.find(pos) != tunnel_esp_nodes.end()) {
+						continue;
+					}
+
+					int max_height = 4;
+					int max_width = 3;
+					if (isValidPotentialTunnelSpace(pos, max_height, max_width, data) 
+						&& isTunnelNode(pos, max_height, max_width, data)) {
+							tunnel_esp_nodes.insert(pos);
+					}
+				}
+			}
+		}
+	}
 }
 
 MapBlockMesh::~MapBlockMesh()

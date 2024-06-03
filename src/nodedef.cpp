@@ -1067,6 +1067,18 @@ NodeDefManager::~NodeDefManager()
 #endif
 }
 
+void NodeDefManager::printESPColors() const 
+{
+    for (const ContentFeatures &feature : m_content_features) 
+    {
+        video::SColor color = feature.getNodeEspColor();
+        
+        std::cout << feature.name << " (" 
+                  << (int)color.getRed() << ", "
+                  << (int)color.getGreen() << ", "
+                  << (int)color.getBlue() << ")" << std::endl;
+    }
+}
 
 void NodeDefManager::clear()
 {

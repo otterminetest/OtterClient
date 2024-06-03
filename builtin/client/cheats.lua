@@ -32,6 +32,8 @@ core.cheats = {
 		["PlayerTracers"] = "enable_player_tracers",
 		["NodeESP"] = "enable_node_esp",
 		["NodeTracers"] = "enable_node_tracers",
+		["TunnelESP"] = "enable_tunnel_esp",
+		["TunnelTracers"] = "enable_tunnel_tracers",
 		["NoRender"] = "norender.particles",
 	},
 	["4.Interact"] = {

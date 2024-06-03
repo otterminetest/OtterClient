@@ -150,6 +150,9 @@ private:
 	// get_inv_item_break(index, nodepos)
 	static int l_get_inv_item_break(lua_State *L);
 
+	// print_esp_colors()
+	static int l_print_esp_colors(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 };
