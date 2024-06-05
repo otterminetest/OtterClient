@@ -279,7 +279,8 @@ void RenderingCore::drawTracersAndESP()
 						flags |= (1 << i);
 					}
 				}
-				if (!flags)
+				// 1. don't render any sides if tunnel blocks connected to all sides and 2. if no tunnel blocks connected then it's most likely not a tunnel block
+				if (!flags || flags == 63)
 					continue;
 				// continue with render
 				v3f pos = intToFloat(p, BS) - camera_offset;
@@ -318,7 +319,7 @@ void RenderingCore::drawTracersAndESP()
 	if (!nEspInfo.empty()) {
 		node_esp_cheat->set_info_text(nEspInfo);
 	}
-	std::string tEspInfo = getEspInfoText(draw_tunnel_esp, nodeDT, tCnt);
+	std::string tEspInfo = getEspInfoText(draw_tunnel_esp, tunnelDT, tCnt);
 	if (!tEspInfo.empty()) {
 		tunnel_esp_cheat->set_info_text(tEspInfo);
 	}
