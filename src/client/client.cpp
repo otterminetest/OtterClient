@@ -67,6 +67,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "content/mod_configuration.h"
 #include "mapnode.h"
 
+#include <iomanip>
+
 extern gui::IGUIEnvironment* guienv;
 
 /*
@@ -1044,9 +1046,27 @@ void Client::ProcessData(NetworkPacket *pkt)
 
 void Client::Send(NetworkPacket* pkt)
 {
-	auto &scf = serverCommandFactoryTable[pkt->getCommand()];
-	FATAL_ERROR_IF(!scf.name, "packet type missing in table");
-	m_con->Send(PEER_ID_SERVER, scf.channel, pkt, scf.reliable);
+    ToServerCommand command = static_cast<ToServerCommand>(pkt->getCommand());
+
+    const char* command_name = serverCommandFactoryTable[command].name;
+    if (!command_name)
+        command_name = "?";
+
+    std::cout << "[Outgoing] Command: " << command_name
+              << " (" << static_cast<unsigned>(command) << "), Size: " 
+              << pkt->getSize() << " bytes\n";
+
+    const char* data = pkt->getData();
+    size_t size = pkt->getSize();
+    std::cout << "[Outgoing] Data: ";
+    for (size_t i = 0; i < size; ++i) {
+        printf("%02X ", static_cast<unsigned char>(data[i]));
+    }
+    std::cout << "\n";
+
+    auto &scf = serverCommandFactoryTable[pkt->getCommand()];
+    FATAL_ERROR_IF(!scf.name, "packet type missing in table");
+    m_con->Send(PEER_ID_SERVER, scf.channel, pkt, scf.reliable);
 }
 
 // Will fill up 12 + 12 + 4 + 4 + 4 + 1 + 1 + 1 bytes
